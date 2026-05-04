@@ -52,41 +52,41 @@ function Sidebar() {
   const pathname = usePathname();
 
   return (
-    <aside className="fixed left-0 top-0 z-40 hidden h-screen w-[240px] flex-col bg-white md:flex" style={{ borderRight: '1px solid rgb(var(--border))' }}>
-      {/* Logo */}
-      <div className="flex items-center gap-3 px-6 py-6">
-        <Image src="/2.png" alt="Growco Logo" width={32} height={32} className="object-contain" />
-        <div className="flex flex-col">
-          <span className="text-lg font-extrabold tracking-tight leading-none text-[rgb(var(--bg-dark))]">GROWCO</span>
-          <span className="text-[10px] font-semibold tracking-widest text-[rgb(var(--cyan-bright))] uppercase mt-0.5">Stockly</span>
-        </div>
+    <aside className="fixed left-0 top-0 z-40 hidden h-screen w-[280px] flex-col bg-white md:flex shadow-[4px_0_24px_rgba(0,0,0,0.02)]" style={{ borderRight: '1px solid rgb(var(--border))' }}>
+      {/* HUGE Logo in Sidebar */}
+      <div className="flex items-center gap-3 px-6 py-8">
+        <Image src="/6.png" alt="Growco Logo" width={200} height={60} className="object-contain h-10 w-auto" priority />
       </div>
 
       {/* Search */}
-      <div className="px-4 pb-2">
+      <div className="px-6 pb-4">
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2" style={{ color: 'rgb(var(--text-dim))' }} />
+          <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2" style={{ color: 'rgb(var(--text-dim))' }} />
           <input
             type="text"
             placeholder="Buscar..."
-            className="bento-input py-2 pl-9 pr-3 text-xs"
+            className="w-full rounded-[16px] border bg-[rgb(var(--bg-input))] px-4 py-3 pl-11 text-sm outline-none transition-all font-medium focus:border-[rgb(var(--cyan))] focus:shadow-[0_0_0_3px_rgba(0,209,255,0.12)]"
           />
         </div>
       </div>
 
       {/* Nav */}
-      <nav className="flex-1 overflow-y-auto px-3 py-1">
+      <nav className="flex-1 overflow-y-auto px-4 py-2">
         {navSections.map((section) => (
-          <div key={section.label} className="mb-2">
-            <div className="px-4 pb-1 pt-4 text-[10px] font-bold uppercase tracking-[0.12em]" style={{ color: 'rgb(var(--text-dim))' }}>
+          <div key={section.label} className="mb-4">
+            <div className="px-4 pb-2 pt-2 text-[11px] font-black uppercase tracking-[0.15em]" style={{ color: 'rgb(var(--text-dim))' }}>
               {section.label}
             </div>
             {section.items.map((item) => {
               const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
               return (
                 <Link key={item.href} href={item.href}
-                  className={`nav-item mb-0.5 ${isActive ? "active" : ""}`}>
-                  <item.icon className="h-[18px] w-[18px] flex-shrink-0" />
+                  className={`flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-bold transition-all cursor-pointer select-none mb-1 ${
+                    isActive 
+                      ? "bg-[rgb(var(--bg-dark))] text-[rgb(var(--text-on-dark))] shadow-lg shadow-[rgba(12,15,30,0.2)]" 
+                      : "text-[rgb(var(--text-secondary))] hover:bg-[rgb(var(--bg-muted))] hover:text-[rgb(var(--text-primary))]"
+                  }`}>
+                  <item.icon className="h-5 w-5 flex-shrink-0" />
                   <span>{item.label}</span>
                 </Link>
               );
@@ -96,17 +96,17 @@ function Sidebar() {
       </nav>
 
       {/* User */}
-      <div className="p-4">
-        <div className="flex items-center gap-3 rounded-2xl p-3" style={{ background: 'rgb(var(--bg-base))' }}>
-          <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl text-sm font-bold bg-[rgb(var(--bg-dark))] text-white">
+      <div className="p-6">
+        <div className="flex items-center gap-3 rounded-2xl p-4 bg-[rgb(var(--bg-input))] border border-[rgb(var(--border))] hover:border-[rgb(var(--cyan-dim))] transition-colors cursor-pointer">
+          <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-[14px] text-base font-black glass-cyan text-white shadow-md">
             A
           </div>
           <div className="min-w-0 flex-1">
-            <div className="truncate text-sm font-semibold">Admin</div>
-            <div className="text-[11px]" style={{ color: 'rgb(var(--text-dim))' }}>Owner</div>
+            <div className="truncate text-sm font-bold text-[rgb(var(--bg-dark))]">Administrador</div>
+            <div className="text-[11px] font-semibold tracking-wide uppercase text-[rgb(var(--cyan-bright))]">Owner</div>
           </div>
           <button style={{ color: 'rgb(var(--text-dim))' }} className="transition-colors hover:text-[rgb(var(--red-main))]">
-            <LogOut className="h-4 w-4" />
+            <LogOut className="h-5 w-5" />
           </button>
         </div>
       </div>
@@ -117,20 +117,21 @@ function Sidebar() {
 function BottomTabs() {
   const pathname = usePathname();
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-40 border-t bg-white/95 backdrop-blur-md md:hidden">
-      <div className="flex items-stretch">
+    <nav className="fixed bottom-0 left-0 right-0 z-40 border-t bg-white/95 backdrop-blur-md md:hidden shadow-[0_-10px_40px_rgba(0,0,0,0.05)] pb-safe">
+      <div className="flex items-stretch px-2 py-1">
         {bottomTabs.map((tab) => {
           const isActive = pathname === tab.href || pathname.startsWith(tab.href + "/");
           return (
             <Link key={tab.href} href={tab.href}
-              className={`flex flex-1 flex-col items-center gap-0.5 py-2.5 text-[11px] font-medium transition-colors ${
-                isActive ? "font-bold" : ""
-              }`}
-              style={{ color: isActive ? 'rgb(var(--bg-dark))' : 'rgb(var(--text-dim))' }}>
-              <div className={`flex h-8 w-8 items-center justify-center rounded-xl transition-colors ${isActive ? "bg-[rgb(var(--bg-dark))] text-white" : ""}`}>
-                <tab.icon className="h-4 w-4" />
+              className={`flex flex-1 flex-col items-center justify-center gap-1 py-2 text-[10px] font-bold transition-all ${
+                isActive ? "text-[rgb(var(--bg-dark))]" : "text-[rgb(var(--text-dim))]"
+              }`}>
+              <div className={`flex h-10 w-10 items-center justify-center rounded-2xl transition-all ${
+                isActive ? "glass-cyan text-white shadow-[0_4px_12px_rgba(0,209,255,0.3)]" : "hover:bg-[rgb(var(--bg-muted))]"
+              }`}>
+                <tab.icon className="h-5 w-5" />
               </div>
-              <span>{tab.label}</span>
+              <span className="mt-0.5">{tab.label}</span>
             </Link>
           );
         })}
@@ -143,8 +144,14 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   return (
     <div className="min-h-screen" style={{ background: 'rgb(var(--bg-base))' }}>
       <Sidebar />
-      <main className="min-h-screen pb-24 transition-all md:ml-[240px] md:pb-0">
-        <div className="mx-auto max-w-7xl px-4 py-6 md:px-8 md:py-8">
+      <main className="min-h-screen pb-24 transition-all md:ml-[280px] md:pb-0">
+        {/* Mobile Header */}
+        <header className="flex items-center justify-between px-6 py-4 bg-white border-b border-[rgb(var(--border))] md:hidden sticky top-0 z-30 shadow-sm">
+           <Image src="/6.png" alt="Growco Logo" width={140} height={40} className="object-contain h-7 w-auto" />
+           <div className="flex h-8 w-8 items-center justify-center rounded-xl glass-cyan text-white text-xs font-bold">A</div>
+        </header>
+
+        <div className="mx-auto max-w-7xl px-4 py-8 md:px-10 md:py-10">
           {children}
         </div>
       </main>
