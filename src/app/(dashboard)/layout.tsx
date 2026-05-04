@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import {
   LayoutDashboard, Package, ShoppingCart, Users, Truck,
@@ -53,10 +54,8 @@ function Sidebar() {
   return (
     <aside className="fixed left-0 top-0 z-40 hidden h-screen w-[240px] flex-col bg-white md:flex" style={{ borderRight: '1px solid rgb(var(--border))' }}>
       {/* Logo */}
-      <div className="flex items-center gap-3 px-6 py-5">
-        <div className="flex h-10 w-10 items-center justify-center rounded-2xl glass-cyan">
-          <div className="text-white font-extrabold text-lg tracking-tighter">G</div>
-        </div>
+      <div className="flex items-center gap-3 px-6 py-6">
+        <Image src="/2.png" alt="Growco Logo" width={32} height={32} className="object-contain" />
         <div className="flex flex-col">
           <span className="text-lg font-extrabold tracking-tight leading-none text-[rgb(var(--bg-dark))]">GROWCO</span>
           <span className="text-[10px] font-semibold tracking-widest text-[rgb(var(--cyan-bright))] uppercase mt-0.5">Stockly</span>

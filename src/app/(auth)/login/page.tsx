@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { Package } from "lucide-react";
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 
@@ -29,18 +29,23 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center px-4" style={{ background: 'rgb(var(--bg-base))' }}>
-      <div className="w-full max-w-sm animate-fade-up bento-card p-10 relative overflow-hidden">
+    <div className="flex min-h-screen items-center justify-center px-4 relative overflow-hidden" style={{ background: 'rgb(var(--bg-base))' }}>
+      {/* Decorative background 10 */}
+      <div className="absolute left-0 bottom-0 w-full max-w-[800px] opacity-10 pointer-events-none transform -translate-x-1/4 translate-y-1/4">
+        <Image src="/10.png" alt="Decorative" width={800} height={800} className="object-contain" priority />
+      </div>
+
+      <div className="w-full max-w-sm animate-fade-up bento-card p-10 relative z-10 overflow-hidden shadow-2xl shadow-[rgba(0,209,255,0.05)] border border-white">
         
         {/* Glow effect */}
         <div className="absolute -right-20 -top-20 w-48 h-48 bg-[rgb(var(--cyan))] blur-[80px] opacity-20 rounded-full"></div>
 
-        <div className="mb-8 text-center relative z-10">
-          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl glass-cyan">
-            <span className="text-white font-extrabold text-2xl tracking-tighter">G</span>
+        <div className="mb-8 text-center relative z-10 flex flex-col items-center">
+          <div className="mx-auto mb-5 drop-shadow-2xl">
+            <Image src="/12.png" alt="Growco 3D Logo" width={80} height={80} className="object-contain" priority />
           </div>
-          <h1 className="text-2xl font-extrabold tracking-tight text-[rgb(var(--bg-dark))]">Growco</h1>
-          <p className="mt-1 text-xs font-bold tracking-widest uppercase text-[rgb(var(--cyan-bright))]">Stockly</p>
+          <Image src="/6.png" alt="Growco Full Logo" width={120} height={30} className="object-contain mb-1" priority />
+          <p className="mt-1 text-xs font-bold tracking-widest uppercase text-[rgb(var(--cyan-bright))]">Stockly Demo</p>
         </div>
 
         <form onSubmit={handleLogin} className="space-y-5 relative z-10">
