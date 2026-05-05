@@ -57,7 +57,12 @@ export default function SignupPage() {
           <div className="mx-auto mb-6 drop-shadow-[0_20px_40px_rgba(0,51,255,0.3)] transform hover:scale-105 transition-transform duration-500">
             <Image src="/12.png" alt="Growco 3D Logo" width={160} height={160} className="object-contain" priority />
           </div>
-          <Image src="/6.png" alt="Growco Full Logo" width={180} height={50} className="object-contain mb-2" priority />
+          
+          <div className="flex items-center gap-3 mb-2">
+            <Image src="/2.png" alt="Growco Icon" width={32} height={32} className="object-contain" priority />
+            <span className="text-2xl font-black tracking-tight text-[rgb(var(--bg-dark))]">GROWCO</span>
+          </div>
+
           <p className="mt-1 text-sm font-black tracking-[0.2em] uppercase text-[rgb(var(--cyan-bright))]">Stockly Demo</p>
         </div>
 

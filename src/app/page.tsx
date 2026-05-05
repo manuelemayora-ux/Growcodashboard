@@ -17,8 +17,11 @@ export default function LandingPage() {
       <header className="sticky top-0 z-50 bg-white/60 backdrop-blur-xl border-b border-[rgba(255,255,255,0.5)] shadow-sm">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-5">
           <div className="flex items-center gap-4">
-            {/* BIGGER LOGO */}
-            <Image src="/6.png" alt="Growco Full Logo" width={220} height={70} className="object-contain h-12 w-auto drop-shadow-md" priority />
+            {/* Minimalist Logo 2.png */}
+            <div className="flex items-center gap-3">
+              <Image src="/2.png" alt="Growco Logo" width={36} height={36} className="object-contain" priority />
+              <span className="text-2xl font-black tracking-tight text-[rgb(var(--bg-dark))]">GROWCO</span>
+            </div>
             <div className="h-8 w-px bg-gray-300 mx-2 hidden sm:block"></div>
             <span className="text-sm font-extrabold tracking-[0.2em] text-[rgb(var(--cyan-bright))] uppercase hidden sm:block">Stockly</span>
           </div>
@@ -131,10 +134,44 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* ---- MODULES ---- */}
+      <section id="modulos" className="px-6 py-24 bg-[rgb(var(--bg-base))] border-t border-[rgb(var(--border))]">
+        <div className="mx-auto max-w-7xl">
+          <div className="mb-14 text-center">
+            <h2 className="text-4xl font-black md:text-5xl text-[rgb(var(--bg-dark))]">Módulos incluidos</h2>
+            <p className="mt-4 text-lg font-medium" style={{ color: 'rgb(var(--text-secondary))' }}>
+              Todo lo que necesitas para operar desde el día 1
+            </p>
+          </div>
+
+          <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+            {[
+              { icon: Package, title: "Inventario", desc: "Control multi-bodega con alertas de stock bajo y seguimiento en tiempo real.", tag: "Core" },
+              { icon: ShoppingCart, title: "Punto de Venta", desc: "POS rápido con búsqueda por código, múltiples formas de pago y recibos.", tag: "Core" },
+              { icon: BarChart3, title: "Reportes", desc: "Dashboard con métricas del día, productos top, márgenes y analíticas profundas.", tag: "Analíticas" },
+              { icon: Shield, title: "Seguridad Growco", desc: "Arquitectura segura, aislamiento de datos y respaldos automáticos.", tag: "Seguridad" },
+              { icon: Users, title: "Clientes", desc: "Base de datos de clientes con historial de compras y perfiles.", tag: "CRM" },
+              { icon: Boxes, title: "Multi-Sucursal", desc: "Administra múltiples tiendas y bodegas con transferencias de stock.", tag: "Operaciones" },
+            ].map((m, i) => (
+              <div key={i} className="group p-8 rounded-[32px] border border-[rgb(var(--border))] bg-white hover:shadow-2xl transition-all hover:border-[rgb(var(--cyan-dim))]" style={{ cursor: 'default' }}>
+                <div className="flex items-center justify-between mb-6">
+                  <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[rgb(var(--cyan-dim))] text-[rgb(var(--blue-deep))]">
+                    <m.icon className="h-7 w-7" />
+                  </div>
+                  <span className="badge-pill badge-dark px-3">{m.tag}</span>
+                </div>
+                <h3 className="text-xl font-bold text-[rgb(var(--bg-dark))]">{m.title}</h3>
+                <p className="mt-3 text-base leading-relaxed font-medium" style={{ color: 'rgb(var(--text-secondary))' }}>{m.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* ---- WHAT'S INCLUDED ---- */}
-      <section className="px-6 py-32 relative overflow-hidden">
+      <section className="px-6 py-32 relative overflow-hidden bg-white">
         {/* Massive Background decorative 10 */}
-        <div className="absolute left-0 top-0 w-[1000px] h-[1000px] opacity-20 pointer-events-none transform -translate-x-1/4 -translate-y-1/4 mix-blend-multiply">
+        <div className="absolute left-0 top-0 w-[1000px] h-[1000px] opacity-10 pointer-events-none transform -translate-x-1/4 -translate-y-1/4 mix-blend-multiply">
           <Image src="/10.png" alt="Decorative" width={1000} height={1000} className="object-contain" />
         </div>
 
@@ -171,7 +208,7 @@ export default function LandingPage() {
       </section>
 
       {/* ---- CTA ---- */}
-      <section className="px-6 pb-32">
+      <section className="px-6 pb-32 bg-white">
         <div className="mx-auto max-w-5xl text-center">
           <div className="rounded-[48px] p-16 md:p-24 relative overflow-hidden glass-cyan border-[3px] border-[rgba(0,209,255,0.4)] shadow-[0_20px_80px_rgba(0,51,255,0.5)]">
             <div className="absolute inset-0 bg-gradient-to-r from-[rgb(var(--blue-deep))] to-[rgb(var(--cyan))] opacity-95"></div>
@@ -200,8 +237,9 @@ export default function LandingPage() {
       {/* ---- FOOTER ---- */}
       <footer className="px-6 py-10 bg-white border-t border-[rgb(var(--border))] relative z-10">
         <div className="mx-auto flex max-w-7xl items-center justify-between">
-          <div className="flex items-center gap-4">
-             <Image src="/6.png" alt="Growco Full Logo" width={140} height={40} className="object-contain h-8 w-auto" />
+          <div className="flex items-center gap-3">
+             <Image src="/2.png" alt="Growco Icon" width={28} height={28} className="object-contain" />
+             <span className="font-black text-[rgb(var(--bg-dark))] text-lg tracking-tight">GROWCO</span>
           </div>
           <p className="text-sm font-bold" style={{ color: 'rgb(var(--text-dim))' }}>
             © {new Date().getFullYear()} Growco AI · Innovation Labs

@@ -53,9 +53,13 @@ function Sidebar() {
 
   return (
     <aside className="fixed left-0 top-0 z-40 hidden h-screen w-[280px] flex-col bg-white md:flex shadow-[4px_0_24px_rgba(0,0,0,0.02)]" style={{ borderRight: '1px solid rgb(var(--border))' }}>
-      {/* HUGE Logo in Sidebar */}
-      <div className="flex items-center gap-3 px-6 py-8">
-        <Image src="/6.png" alt="Growco Logo" width={200} height={60} className="object-contain h-10 w-auto" priority />
+      {/* Minimalist Logo 2.png */}
+      <div className="flex items-center gap-4 px-6 py-8">
+        <Image src="/2.png" alt="Growco Logo" width={48} height={48} className="object-contain" priority />
+        <div className="flex flex-col">
+          <span className="text-xl font-black tracking-tight leading-none text-[rgb(var(--bg-dark))]">GROWCO</span>
+          <span className="text-[10px] font-bold tracking-widest text-[rgb(var(--cyan-bright))] uppercase mt-0.5">Stockly</span>
+        </div>
       </div>
 
       {/* Search */}
@@ -147,7 +151,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       <main className="min-h-screen pb-24 transition-all md:ml-[280px] md:pb-0">
         {/* Mobile Header */}
         <header className="flex items-center justify-between px-6 py-4 bg-white border-b border-[rgb(var(--border))] md:hidden sticky top-0 z-30 shadow-sm">
-           <Image src="/6.png" alt="Growco Logo" width={140} height={40} className="object-contain h-7 w-auto" />
+           <div className="flex items-center gap-2">
+             <Image src="/2.png" alt="Growco Logo" width={28} height={28} className="object-contain" />
+             <span className="font-black text-[rgb(var(--bg-dark))]">GROWCO</span>
+           </div>
            <div className="flex h-8 w-8 items-center justify-center rounded-xl glass-cyan text-white text-xs font-bold">A</div>
         </header>
 
