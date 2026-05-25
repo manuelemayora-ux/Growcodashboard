@@ -36,7 +36,7 @@ export default function LandingPage() {
       {/* ---- HERO ---- */}
       <section className="px-6 pb-24 pt-20 md:pt-32 relative z-10">
         <div className="mx-auto max-w-7xl">
-          <div className="grid lg:grid-cols-[1.2fr_1.8fr] gap-12 lg:gap-16 items-center">
+          <div className="grid lg:grid-cols-[1fr_2fr] gap-8 lg:gap-12 items-center">
             <div className="relative z-20">
               <div className="mb-8 inline-flex items-center gap-3 rounded-full px-5 py-2 text-sm font-bold glass-cyan text-[rgb(var(--bg-dark))] shadow-lg border border-[rgba(0,209,255,0.3)]">
                 <span className="flex h-2.5 w-2.5 rounded-full animate-pulse" style={{ background: 'rgb(var(--accent))' }} />
@@ -69,8 +69,8 @@ export default function LandingPage() {
             
             {/* HERO IMAGE - MASSIVE 3D GLASS G */}
             <div className="relative flex justify-center lg:justify-end animate-fade-up animate-float w-full">
-              <div className="absolute inset-0 bg-gradient-to-tr from-[rgb(var(--cyan))] via-[rgb(var(--blue-deep))] to-[rgb(var(--cyan-bright))] opacity-50 blur-[150px] rounded-full transform scale-150"></div>
-              <Image src="/12.png" alt="Growco Logo" width={1800} height={1800} className="w-full max-w-[1200px] lg:max-w-[1500px] h-auto object-contain relative z-20 drop-shadow-[0_60px_110px_rgba(0,51,255,0.45)] transform hover:scale-105 transition-transform duration-700 ease-out" priority />
+              <div className="absolute inset-0 bg-gradient-to-tr from-[rgb(var(--cyan))] via-[rgb(var(--blue-deep))] to-[rgb(var(--cyan-bright))] opacity-50 blur-[160px] rounded-full transform scale-150"></div>
+              <Image src="/12.png" alt="Growco Logo" width={1800} height={1800} className="w-full max-w-[1200px] lg:max-w-[1600px] h-auto object-contain relative z-20 drop-shadow-[0_60px_110px_rgba(0,51,255,0.45)] transform scale-110 lg:scale-130 hover:scale-135 transition-transform duration-700 ease-out" priority />
             </div>
           </div>
         </div>
