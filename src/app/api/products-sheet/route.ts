@@ -2,7 +2,7 @@ export const dynamic = 'force-dynamic';
 
 import { NextResponse } from 'next/server';
 
-const CSV_URL = 'https://docs.google.com/spreadsheets/d/1ffkOmgG1WORH0hoqHzcdlTsdyhvO9q6jNOcY_kjhmH0/export?format=csv';
+const CSV_URL = process.env.GOOGLE_SHEET_URL || 'https://docs.google.com/spreadsheets/d/1ffkOmgG1WORH0hoqHzcdlTsdyhvO9q6jNOcY_kjhmH0/export?format=csv';
 
 const BRANDS = [
   'Gucci', 'Vogue Eyewear', 'Vogue', 'Dolce & Gabbana', 'Dolce', 'Fendi', 

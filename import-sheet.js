@@ -31,7 +31,7 @@ if (!supabaseUrl || !supabaseKey) {
   process.exit(1);
 }
 
-const csvUrl = 'https://docs.google.com/spreadsheets/d/1ffkOmgG1WORH0hoqHzcdlTsdyhvO9q6jNOcY_kjhmH0/export?format=csv';
+const csvUrl = env.GOOGLE_SHEET_URL || 'https://docs.google.com/spreadsheets/d/1ffkOmgG1WORH0hoqHzcdlTsdyhvO9q6jNOcY_kjhmH0/export?format=csv';
 
 const BRANDS = [
   'Gucci', 'Vogue Eyewear', 'Vogue', 'Dolce & Gabbana', 'Dolce', 'Fendi', 
