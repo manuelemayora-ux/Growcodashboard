@@ -33,70 +33,70 @@ export default function DashboardPage() {
       </div>
 
       {/* Bento Grid — Row 1: 4 stat cards */}
-      <div className="mb-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="mb-4 grid grid-cols-4 gap-2 sm:gap-4">
         {/* Total Productos — Dark block */}
-        <div className="bento-dark flex flex-col justify-between hover:shadow-lg transition-all">
+        <div className="bento-dark flex flex-col justify-between hover:shadow-lg transition-all !p-3 sm:!p-6 rounded-xl sm:rounded-[24px]">
           <div className="flex items-center justify-between">
-            <span className="stat-label" style={{ color: 'rgba(255,255,255,0.6)' }}>Total Productos</span>
-            <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-white/10">
-              <Package className="h-4 w-4 text-white" />
+            <span className="stat-label !text-[9px] sm:!text-xs leading-tight opacity-60">Total Productos</span>
+            <div className="hidden xs:flex h-6 w-6 sm:h-8 sm:w-8 items-center justify-center rounded-lg sm:rounded-xl bg-white/10 shrink-0">
+              <Package className="h-3 w-3 sm:h-4 sm:w-4 text-white" />
             </div>
           </div>
-          <div className="mt-4">
-            <div className="stat-value text-white">{stats.totalProducts}</div>
-            <div className="mt-1 text-xs font-medium text-white/50">{stats.totalStock.toLocaleString()} unidades en stock</div>
+          <div className="mt-2 sm:mt-4">
+            <div className="stat-value !text-sm sm:!text-2xl lg:!text-3xl text-white">{stats.totalProducts}</div>
+            <div className="mt-0.5 sm:mt-1 text-[8px] sm:text-xs font-medium text-white/50 truncate">{stats.totalStock.toLocaleString()} uds</div>
           </div>
         </div>
 
         {/* Valor Inventario — Growco Cyan Glass */}
-        <div className="bento-cyan flex flex-col justify-between relative overflow-hidden transition-all hover:shadow-[0_8px_30px_rgba(0,209,255,0.3)]">
+        <div className="bento-cyan flex flex-col justify-between relative overflow-hidden transition-all hover:shadow-[0_8px_30px_rgba(0,209,255,0.3)] !p-3 sm:!p-6 rounded-xl sm:rounded-[24px]">
           <div className="absolute -right-6 -top-6 w-24 h-24 bg-[rgb(var(--cyan-bright))] blur-2xl opacity-40 rounded-full"></div>
           <div className="flex items-center justify-between relative z-10">
-            <span className="stat-label text-white/80">Valor Inventario</span>
-            <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-white/20 backdrop-blur-md">
-              <DollarSign className="h-4 w-4 text-white" />
+            <span className="stat-label !text-[9px] sm:!text-xs leading-tight text-white/80">Valor Inventario</span>
+            <div className="hidden xs:flex h-6 w-6 sm:h-8 sm:w-8 items-center justify-center rounded-lg sm:rounded-xl bg-white/20 backdrop-blur-md shrink-0">
+              <DollarSign className="h-3 w-3 sm:h-4 sm:w-4 text-white" />
             </div>
           </div>
-          <div className="mt-4 relative z-10">
-            <div className="stat-value font-mono-price text-white">${stats.inventoryValue.toLocaleString("en-US", { minimumFractionDigits: 2 })}</div>
-            <div className="mt-1 text-xs font-medium text-white/70">Costo total invertido</div>
+          <div className="mt-2 sm:mt-4 relative z-10">
+            <div className="stat-value font-mono-price !text-sm sm:!text-2xl lg:!text-3xl text-white">${stats.inventoryValue.toLocaleString("en-US", { maximumFractionDigits: 0 })}</div>
+            <div className="mt-0.5 sm:mt-1 text-[8px] sm:text-xs font-medium text-white/70 truncate">Costo invertido</div>
           </div>
         </div>
 
         {/* Utilidad Potencial — White block with Lime */}
-        <div className="bento-card flex flex-col justify-between hover:shadow-md transition-all">
+        <div className="bento-card flex flex-col justify-between hover:shadow-md transition-all !p-3 sm:!p-6 rounded-xl sm:rounded-[24px]">
           <div className="flex items-center justify-between">
-            <span className="stat-label">Utilidad Potencial</span>
-            <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-[rgb(var(--accent-dim))]">
-              <TrendingUp className="h-4 w-4 text-[rgb(var(--green-main))]" />
+            <span className="stat-label !text-[9px] sm:!text-xs leading-tight">Utilidad Potencial</span>
+            <div className="hidden xs:flex h-6 w-6 sm:h-8 sm:w-8 items-center justify-center rounded-lg sm:rounded-xl bg-[rgb(var(--accent-dim))] shrink-0">
+              <TrendingUp className="h-3 w-3 sm:h-4 sm:w-4 text-[rgb(var(--green-main))]" />
             </div>
           </div>
-          <div className="mt-4">
-            <div className="stat-value font-mono-price text-[rgb(var(--bg-dark))]">
-              ${stats.potentialProfit.toLocaleString("en-US", { minimumFractionDigits: 2 })}
+          <div className="mt-2 sm:mt-4">
+            <div className="stat-value font-mono-price !text-sm sm:!text-2xl lg:!text-3xl text-[rgb(var(--bg-dark))]">
+              ${stats.potentialProfit.toLocaleString("en-US", { maximumFractionDigits: 0 })}
             </div>
-            <div className="mt-1 flex items-center gap-1 text-xs font-bold text-[rgb(var(--green-main))]">
-              <ArrowUpRight className="h-3 w-3" /> Venta − Costo
+            <div className="mt-0.5 sm:mt-1 flex items-center gap-0.5 text-[8px] sm:text-xs font-bold text-[rgb(var(--green-main))] truncate">
+              <ArrowUpRight className="h-2 w-2 sm:h-3 sm:w-3 shrink-0" /> Venta − Costo
             </div>
           </div>
         </div>
 
         {/* Alertas — Muted */}
-        <div className="bento-muted flex flex-col justify-between hover:shadow-md transition-all">
+        <div className="bento-muted flex flex-col justify-between hover:shadow-md transition-all !p-3 sm:!p-6 rounded-xl sm:rounded-[24px]">
           <div className="flex items-center justify-between">
-            <span className="stat-label">Alertas Stock</span>
-            <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-white shadow-sm">
-              <AlertTriangle className="h-4 w-4 text-[rgb(var(--amber-main))]" />
+            <span className="stat-label !text-[9px] sm:!text-xs leading-tight">Alertas Stock</span>
+            <div className="hidden xs:flex h-6 w-6 sm:h-8 sm:w-8 items-center justify-center rounded-lg sm:rounded-xl bg-white shadow-sm shrink-0">
+              <AlertTriangle className="h-3 w-3 sm:h-4 sm:w-4 text-[rgb(var(--amber-main))]" />
             </div>
           </div>
-          <div className="mt-4 flex items-baseline gap-4">
-            <div>
-              <span className="stat-value text-[rgb(var(--red-main))]">{stats.outOfStock}</span>
-              <span className="ml-1.5 text-xs font-medium style={{color:'rgb(var(--text-secondary))'}}">agotados</span>
+          <div className="mt-2 sm:mt-4 flex flex-col xs:flex-row items-baseline gap-1 xs:gap-3">
+            <div className="flex items-baseline shrink-0">
+              <span className="stat-value !text-sm sm:!text-2xl lg:!text-3xl text-[rgb(var(--red-main))]">{stats.outOfStock}</span>
+              <span className="ml-1 text-[8px] sm:text-xs font-medium text-[rgb(var(--text-secondary))]">agot.</span>
             </div>
-            <div>
-              <span className="stat-value text-[rgb(var(--amber-main))]">{stats.lowStock}</span>
-              <span className="ml-1.5 text-xs font-medium style={{color:'rgb(var(--text-secondary))'}}">bajos</span>
+            <div className="flex items-baseline shrink-0">
+              <span className="stat-value !text-sm sm:!text-2xl lg:!text-3xl text-[rgb(var(--amber-main))]">{stats.lowStock}</span>
+              <span className="ml-1 text-[8px] sm:text-xs font-medium text-[rgb(var(--text-secondary))]">bajos</span>
             </div>
           </div>
         </div>
