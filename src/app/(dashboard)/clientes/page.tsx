@@ -1,40 +1,50 @@
 "use client";
 
 import { useState } from "react";
-import { Search, Plus, Phone, Mail, MapPin, MoreHorizontal, X, Save, User } from "lucide-react";
-
-interface Client { id:string; name:string; email:string; phone:string; address:string; totalPurchases:number; lastPurchase:string; }
-
-const demoClients:Client[] = [
-  { id:"1", name:"Óptica Central", email:"contacto@opticacentral.com", phone:"+502 5555-1234", address:"Zona 10, Guatemala", totalPurchases:24500, lastPurchase:"2025-08-01" },
-  { id:"2", name:"Visión Total S.A.", email:"ventas@visiontotal.gt", phone:"+502 5555-5678", address:"Zona 14, Guatemala", totalPurchases:18200, lastPurchase:"2025-07-28" },
-  { id:"3", name:"Dr. Manuel López", email:"drlopez@gmail.com", phone:"+502 5555-9012", address:"Antigua Guatemala", totalPurchases:8900, lastPurchase:"2025-07-15" },
-  { id:"4", name:"Farmacias del Pueblo", email:"compras@farmapueblo.com", phone:"+502 5555-3456", address:"Quetzaltenango", totalPurchases:32100, lastPurchase:"2025-08-03" },
-  { id:"5", name:"Lentes Express", email:"info@lentesexpress.com", phone:"+502 5555-7890", address:"Mixco, Guatemala", totalPurchases:15600, lastPurchase:"2025-07-20" },
-  { id:"6", name:"Clínica Visual Maya", email:"admin@visualmaya.gt", phone:"+502 5555-2345", address:"Cobán, Alta Verapaz", totalPurchases:6700, lastPurchase:"2025-06-30" },
-];
+import { useClientes } from "@/hooks/useClientes";
+import { Search, Plus, Phone, MapPin, MoreHorizontal, Save, User, X } from "lucide-react";
 
 export default function ClientesPage() {
-  const [clients, setClients] = useState(demoClients);
+  const { customers, isLoading, createCustomer } = useClientes();
   const [search, setSearch] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [form, setForm] = useState({ name:"", email:"", phone:"", address:"" });
 
-  const filtered = clients.filter(c => !search || c.name.toLowerCase().includes(search.toLowerCase()) || c.email.toLowerCase().includes(search.toLowerCase()));
+  const filtered = customers.filter(c => 
+    !search || 
+    c.name.toLowerCase().includes(search.toLowerCase()) || 
+    c.email.toLowerCase().includes(search.toLowerCase())
+  );
 
-  const save = () => {
+  const save = async () => {
     if(!form.name) return;
-    setClients(prev => [{ id:String(Date.now()), ...form, totalPurchases:0, lastPurchase:"-" }, ...prev]);
-    setShowModal(false);
-    setForm({ name:"", email:"", phone:"", address:"" });
+    try {
+      await createCustomer.mutateAsync(form);
+      setShowModal(false);
+      setForm({ name:"", email:"", phone:"", address:"" });
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      alert("Error al guardar cliente: " + msg);
+    }
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex h-[60vh] items-center justify-center">
+        <div className="text-center">
+          <div className="h-10 w-10 animate-spin rounded-full border-4 border-[rgb(var(--cyan))] border-t-transparent mx-auto mb-4"></div>
+          <p className="text-sm font-semibold" style={{color:'rgb(var(--text-secondary))'}}>Cargando clientes...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="animate-fade-up">
       <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-extrabold tracking-tight text-[rgb(var(--bg-dark))]">Clientes</h1>
-          <p className="text-sm font-medium" style={{color:'rgb(var(--text-secondary))'}}>{clients.length} clientes registrados</p>
+          <p className="text-sm font-medium" style={{color:'rgb(var(--text-secondary))'}}>{customers.length} clientes registrados</p>
         </div>
         <button onClick={()=>{setForm({name:"",email:"",phone:"",address:""});setShowModal(true)}} className="btn-primary"><Plus className="h-4 w-4"/>Nuevo Cliente</button>
       </div>
@@ -55,8 +65,8 @@ export default function ClientesPage() {
               <button className="text-[rgb(var(--text-dim))] hover:text-[rgb(var(--bg-dark))] opacity-0 group-hover:opacity-100 transition-all"><MoreHorizontal className="h-5 w-5"/></button>
             </div>
             <div className="space-y-2 text-sm">
-              <div className="flex items-center gap-2 text-[rgb(var(--text-secondary))]"><Phone className="h-3.5 w-3.5 shrink-0"/>{c.phone}</div>
-              <div className="flex items-center gap-2 text-[rgb(var(--text-secondary))]"><MapPin className="h-3.5 w-3.5 shrink-0"/>{c.address}</div>
+              <div className="flex items-center gap-2 text-[rgb(var(--text-secondary))]"><Phone className="h-3.5 w-3.5 shrink-0"/>{c.phone || "Sin teléfono"}</div>
+              <div className="flex items-center gap-2 text-[rgb(var(--text-secondary))]"><MapPin className="h-3.5 w-3.5 shrink-0"/>{c.address || "Sin dirección"}</div>
             </div>
             <div className="mt-4 pt-4 flex items-center justify-between" style={{borderTop:'1px solid rgb(var(--border))'}}>
               <div><div className="font-mono-price font-bold text-[rgb(var(--bg-dark))]">${c.totalPurchases.toLocaleString()}</div><div className="text-[10px] text-[rgb(var(--text-dim))] font-bold uppercase">Total compras</div></div>
@@ -64,11 +74,17 @@ export default function ClientesPage() {
             </div>
           </div>
         ))}
+        {filtered.length === 0 && (
+          <div className="sm:col-span-2 lg:col-span-3 text-center py-10 text-sm font-semibold" style={{color:'rgb(var(--text-dim))'}}>
+            No se encontraron clientes
+          </div>
+        )}
       </div>
 
       {showModal&&(
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm px-4" onClick={()=>setShowModal(false)}>
           <div className="bento-card w-full max-w-md p-8 animate-fade-up shadow-2xl rounded-[32px]" onClick={e=>e.stopPropagation()}>
+            <button onClick={()=>setShowModal(false)} className="absolute right-6 top-6 text-[rgb(var(--text-dim))] hover:text-[rgb(var(--red-main))]"><X className="h-5 w-5"/></button>
             <div className="flex items-center gap-3 mb-6">
               <div className="h-10 w-10 rounded-xl glass-cyan flex items-center justify-center text-white"><User className="h-5 w-5"/></div>
               <h2 className="text-xl font-black text-[rgb(var(--bg-dark))]">Nuevo Cliente</h2>

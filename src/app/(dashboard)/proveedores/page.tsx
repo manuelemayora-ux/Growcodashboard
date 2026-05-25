@@ -1,32 +1,43 @@
 "use client";
 
 import { useState } from "react";
-import { Search, Plus, Building2, Mail, Phone, Package, Save, X } from "lucide-react";
-
-interface Supplier { id:string; name:string; contact:string; email:string; phone:string; products:number; lastOrder:string; }
-
-const demoSuppliers:Supplier[] = [
-  { id:"1", name:"Distribuidora Óptica GT", contact:"Carlos Méndez", email:"ventas@opticagt.com", phone:"+502 2222-1111", products:15, lastOrder:"2025-08-01" },
-  { id:"2", name:"LensWorld International", contact:"Ana Rivera", email:"orders@lensworld.com", phone:"+1 555-0199", products:22, lastOrder:"2025-07-25" },
-  { id:"3", name:"AeroLens Factory", contact:"Roberto Sánchez", email:"b2b@aerolens.com", phone:"+52 55-1234-5678", products:8, lastOrder:"2025-07-30" },
-  { id:"4", name:"SportVision Supply", contact:"Laura Torres", email:"supply@sportvision.co", phone:"+502 3333-4444", products:12, lastOrder:"2025-08-02" },
-  { id:"5", name:"Clear Optics MFG", contact:"David Kim", email:"wholesale@clearoptics.kr", phone:"+82 2-555-0100", products:18, lastOrder:"2025-07-18" },
-];
+import { useProveedores } from "@/hooks/useProveedores";
+import { Search, Plus, Building2, Save, X } from "lucide-react";
 
 export default function ProveedoresPage() {
-  const [suppliers, setSuppliers] = useState(demoSuppliers);
+  const { suppliers, isLoading, createSupplier } = useProveedores();
   const [search, setSearch] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [form, setForm] = useState({ name:"", contact:"", email:"", phone:"" });
 
-  const filtered = suppliers.filter(s => !search || s.name.toLowerCase().includes(search.toLowerCase()) || s.contact.toLowerCase().includes(search.toLowerCase()));
+  const filtered = suppliers.filter(s => 
+    !search || 
+    s.name.toLowerCase().includes(search.toLowerCase()) || 
+    s.contact.toLowerCase().includes(search.toLowerCase())
+  );
 
-  const save = () => {
+  const save = async () => {
     if(!form.name) return;
-    setSuppliers(prev => [{ id:String(Date.now()), ...form, products:0, lastOrder:"-" }, ...prev]);
-    setShowModal(false);
-    setForm({ name:"", contact:"", email:"", phone:"" });
+    try {
+      await createSupplier.mutateAsync(form);
+      setShowModal(false);
+      setForm({ name:"", contact:"", email:"", phone:"" });
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      alert("Error al guardar proveedor: " + msg);
+    }
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex h-[60vh] items-center justify-center">
+        <div className="text-center">
+          <div className="h-10 w-10 animate-spin rounded-full border-4 border-[rgb(var(--cyan))] border-t-transparent mx-auto mb-4"></div>
+          <p className="text-sm font-semibold" style={{color:'rgb(var(--text-secondary))'}}>Cargando proveedores...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="animate-fade-up">
@@ -44,40 +55,50 @@ export default function ProveedoresPage() {
       </div>
 
       <div className="bento-card p-0 overflow-hidden">
-        <table className="w-full text-sm">
-          <thead>
-            <tr style={{borderBottom:'1px solid rgb(var(--border))'}}>
-              <th className="stat-label px-5 py-3.5 text-left">Empresa</th>
-              <th className="stat-label px-5 py-3.5 text-left">Contacto</th>
-              <th className="stat-label px-5 py-3.5 text-left">Email</th>
-              <th className="stat-label px-5 py-3.5 text-left">Teléfono</th>
-              <th className="stat-label px-5 py-3.5 text-center">Productos</th>
-              <th className="stat-label px-5 py-3.5 text-center">Último Pedido</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filtered.map(s => (
-              <tr key={s.id} className="hover:bg-[rgb(var(--bg-base))] transition-colors" style={{borderBottom:'1px solid rgb(var(--border))'}}>
-                <td className="px-5 py-4">
-                  <div className="flex items-center gap-3">
-                    <div className="h-9 w-9 rounded-xl bg-[rgb(var(--cyan-dim))] flex items-center justify-center text-[rgb(var(--blue-deep))] shrink-0"><Building2 className="h-4 w-4"/></div>
-                    <span className="font-bold text-[rgb(var(--bg-dark))]">{s.name}</span>
-                  </div>
-                </td>
-                <td className="px-5 py-4 text-[rgb(var(--text-secondary))]">{s.contact}</td>
-                <td className="px-5 py-4 text-[rgb(var(--text-dim))]">{s.email}</td>
-                <td className="px-5 py-4 text-[rgb(var(--text-secondary))]">{s.phone}</td>
-                <td className="px-5 py-4 text-center"><span className="badge-pill badge-dark">{s.products}</span></td>
-                <td className="px-5 py-4 text-center"><span className="badge-pill badge-cyan">{s.lastOrder}</span></td>
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead>
+              <tr style={{borderBottom:'1px solid rgb(var(--border))'}}>
+                <th className="stat-label px-5 py-3.5 text-left">Empresa</th>
+                <th className="stat-label px-5 py-3.5 text-left">Contacto</th>
+                <th className="stat-label px-5 py-3.5 text-left">Email</th>
+                <th className="stat-label px-5 py-3.5 text-left">Teléfono</th>
+                <th className="stat-label px-5 py-3.5 text-center">Productos</th>
+                <th className="stat-label px-5 py-3.5 text-center">Último Pedido</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {filtered.map(s => (
+                <tr key={s.id} className="hover:bg-[rgb(var(--bg-base))] transition-colors" style={{borderBottom:'1px solid rgb(var(--border))'}}>
+                  <td className="px-5 py-4">
+                    <div className="flex items-center gap-3">
+                      <div className="h-9 w-9 rounded-xl bg-[rgb(var(--cyan-dim))] flex items-center justify-center text-[rgb(var(--blue-deep))] shrink-0"><Building2 className="h-4 w-4"/></div>
+                      <span className="font-bold text-[rgb(var(--bg-dark))]">{s.name}</span>
+                    </div>
+                  </td>
+                  <td className="px-5 py-4 text-[rgb(var(--text-secondary))]">{s.contact || "Sin contacto"}</td>
+                  <td className="px-5 py-4 text-[rgb(var(--text-dim))]">{s.email || "Sin email"}</td>
+                  <td className="px-5 py-4 text-[rgb(var(--text-secondary))]">{s.phone || "Sin teléfono"}</td>
+                  <td className="px-5 py-4 text-center"><span className="badge-pill badge-dark">{s.products}</span></td>
+                  <td className="px-5 py-4 text-center"><span className="badge-pill badge-cyan">{s.lastOrder}</span></td>
+                </tr>
+              ))}
+              {filtered.length === 0 && (
+                <tr>
+                  <td colSpan={6} className="px-5 py-10 text-center text-sm font-semibold" style={{color:'rgb(var(--text-dim))'}}>
+                    No se encontraron proveedores
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
 
       {showModal&&(
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm px-4" onClick={()=>setShowModal(false)}>
           <div className="bento-card w-full max-w-md p-8 animate-fade-up shadow-2xl rounded-[32px]" onClick={e=>e.stopPropagation()}>
+            <button onClick={()=>setShowModal(false)} className="absolute right-6 top-6 text-[rgb(var(--text-dim))] hover:text-[rgb(var(--red-main))]"><X className="h-5 w-5"/></button>
             <div className="flex items-center gap-3 mb-6">
               <div className="h-10 w-10 rounded-xl glass-cyan flex items-center justify-center text-white"><Building2 className="h-5 w-5"/></div>
               <h2 className="text-xl font-black text-[rgb(var(--bg-dark))]">Nuevo Proveedor</h2>

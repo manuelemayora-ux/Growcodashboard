@@ -1,33 +1,29 @@
 "use client";
 
 import { useState } from "react";
-import { demoProducts, CATEGORIES } from "@/lib/demo-data";
+import { useInventario } from "@/hooks/useInventario";
 import { Search, Package, ArrowUpDown, ArrowUp, ArrowDown, AlertTriangle } from "lucide-react";
 
-interface Movement { id:string; sku:string; product:string; type:"entrada"|"salida"|"ajuste"; qty:number; date:string; note:string; }
-
-const demoMovements:Movement[] = [
-  { id:"1", sku:"SKU-737498-M", product:"AeroLens PR-891", type:"entrada", qty:20, date:"2025-08-01", note:"Compra proveedor" },
-  { id:"2", sku:"SKU-914414-Y", product:"ClearVue NV-321", type:"salida", qty:5, date:"2025-08-02", note:"Venta #1024" },
-  { id:"3", sku:"SKU-881599-D", product:"PrismCraft OF-52", type:"ajuste", qty:-2, date:"2025-08-03", note:"Inventario físico" },
-  { id:"4", sku:"SKU-608931-U", product:"FocusLine VX-911", type:"entrada", qty:50, date:"2025-08-03", note:"Reposición" },
-  { id:"5", sku:"SKU-822398-F", product:"LuxSight AX-3842", type:"salida", qty:3, date:"2025-08-04", note:"Venta #1025" },
-  { id:"6", sku:"SKU-338820-G", product:"FrameLab AX-88", type:"salida", qty:4, date:"2025-08-04", note:"Venta #1026" },
-  { id:"7", sku:"SKU-777374-B", product:"OptiZen AX-4323", type:"entrada", qty:30, date:"2025-08-05", note:"Compra proveedor" },
-  { id:"8", sku:"SKU-919331-A", product:"LuxSight PR-1149", type:"ajuste", qty:0, date:"2025-08-05", note:"Producto agotado confirmado" },
-];
-
 export default function InventarioPage() {
+  const { movements, summary, isLoading } = useInventario();
   const [search, setSearch] = useState("");
-  const [catFilter, setCatFilter] = useState("");
 
-  const lowStock = demoProducts.filter(p=>p.stock>0&&p.stock<=10);
-  const outStock = demoProducts.filter(p=>p.outOfStock);
-  const totalUnits = demoProducts.reduce((s,p)=>s+p.stock,0);
-
-  const filteredMov = demoMovements.filter(m =>
-    (!search || m.product.toLowerCase().includes(search.toLowerCase()) || m.sku.toLowerCase().includes(search.toLowerCase()))
+  const filteredMov = movements.filter(m =>
+    !search || 
+    m.product.toLowerCase().includes(search.toLowerCase()) || 
+    m.sku.toLowerCase().includes(search.toLowerCase())
   );
+
+  if (isLoading) {
+    return (
+      <div className="flex h-[60vh] items-center justify-center">
+        <div className="text-center">
+          <div className="h-10 w-10 animate-spin rounded-full border-4 border-[rgb(var(--cyan))] border-t-transparent mx-auto mb-4"></div>
+          <p className="text-sm font-semibold" style={{color:'rgb(var(--text-secondary))'}}>Cargando inventario...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="animate-fade-up">
@@ -39,15 +35,15 @@ export default function InventarioPage() {
       <div className="mb-6 grid gap-4 sm:grid-cols-3">
         <div className="bento-card flex items-center gap-4">
           <div className="h-12 w-12 rounded-2xl bg-[rgb(var(--cyan-dim))] flex items-center justify-center text-[rgb(var(--blue-deep))]"><Package className="h-6 w-6"/></div>
-          <div><div className="stat-value text-[rgb(var(--bg-dark))]">{totalUnits.toLocaleString()}</div><div className="stat-label">Unidades totales</div></div>
+          <div><div className="stat-value text-[rgb(var(--bg-dark))]">{summary.totalUnits.toLocaleString()}</div><div className="stat-label">Unidades totales</div></div>
         </div>
         <div className="bento-card flex items-center gap-4">
           <div className="h-12 w-12 rounded-2xl bg-[rgb(var(--amber-dim))] flex items-center justify-center text-[rgb(var(--amber-main))]"><AlertTriangle className="h-6 w-6"/></div>
-          <div><div className="stat-value text-[rgb(var(--amber-main))]">{lowStock.length}</div><div className="stat-label">Stock bajo (≤10)</div></div>
+          <div><div className="stat-value text-[rgb(var(--amber-main))]">{summary.lowStockCount}</div><div className="stat-label">Stock bajo (≤10)</div></div>
         </div>
         <div className="bento-card flex items-center gap-4">
           <div className="h-12 w-12 rounded-2xl bg-[rgb(var(--red-dim))] flex items-center justify-center text-[rgb(var(--red-main))]"><Package className="h-6 w-6"/></div>
-          <div><div className="stat-value text-[rgb(var(--red-main))]">{outStock.length}</div><div className="stat-label">Agotados</div></div>
+          <div><div className="stat-value text-[rgb(var(--red-main))]">{summary.outOfStockCount}</div><div className="stat-label">Agotados</div></div>
         </div>
       </div>
 
@@ -84,6 +80,11 @@ export default function InventarioPage() {
                   </div>
                 </div>
               ))}
+              {filteredMov.length === 0 && (
+                <div className="px-5 py-10 text-center text-sm font-semibold" style={{color:'rgb(var(--text-dim))'}}>
+                  No hay movimientos registrados
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -95,8 +96,8 @@ export default function InventarioPage() {
               <h3 className="text-base font-bold text-white mb-4 flex items-center gap-2">
                 <div className="w-2 h-2 rounded-full bg-[rgb(var(--accent))] animate-pulse"></div> Stock Crítico
               </h3>
-              {lowStock.length===0?<p className="text-white/40 text-sm py-4 text-center">Todo en orden ✅</p>:
-                lowStock.map(p=>(
+              {summary.lowStockProducts.length===0?<p className="text-white/40 text-sm py-4 text-center">Todo en orden ✅</p>:
+                summary.lowStockProducts.map(p=>(
                   <div key={p.sku} className="flex items-center justify-between py-2.5 border-b border-white/5 last:border-0">
                     <div className="min-w-0 flex-1 pr-2"><div className="truncate text-sm font-semibold text-white">{p.name}</div><div className="text-[11px] text-white/40">{p.category}</div></div>
                     <span className={`badge-pill ${p.stock<=5?"badge-red":"badge-amber"}`}>{p.stock}</span>
@@ -109,20 +110,23 @@ export default function InventarioPage() {
           <div className="bento-card">
             <h3 className="text-base font-bold text-[rgb(var(--bg-dark))] mb-4">Stock por Categoría</h3>
             <div className="space-y-3">
-              {CATEGORIES.slice(0,6).map(cat => {
-                const units = demoProducts.filter(p=>p.category===cat).reduce((s,p)=>s+p.stock,0);
-                const pct = totalUnits>0?(units/totalUnits*100):0;
-                return (
-                  <div key={cat} className="flex items-center gap-3">
-                    <span className="w-24 text-xs font-medium text-[rgb(var(--text-secondary))] truncate">{cat}</span>
-                    <div className="flex-1 h-6 rounded-lg overflow-hidden bg-[rgb(var(--bg-input))]">
-                      <div className="h-full rounded-lg bg-[rgb(var(--bg-dark))] flex items-center justify-end pr-2" style={{width:`${Math.max(pct,8)}%`}}>
-                        <span className="text-[10px] font-bold text-white">{units}</span>
+              {summary.stockByCategory.length === 0 ? (
+                <p className="text-center text-xs font-semibold py-4" style={{color:'rgb(var(--text-dim))'}}>Sin productos en stock</p>
+              ) : (
+                summary.stockByCategory.slice(0,6).map(cat => {
+                  const pct = summary.totalUnits>0?(cat.stock/summary.totalUnits*100):0;
+                  return (
+                    <div key={cat.name} className="flex items-center gap-3">
+                      <span className="w-24 text-xs font-medium text-[rgb(var(--text-secondary))] truncate">{cat.name}</span>
+                      <div className="flex-1 h-6 rounded-lg overflow-hidden bg-[rgb(var(--bg-input))]">
+                        <div className="h-full rounded-lg bg-[rgb(var(--bg-dark))] flex items-center justify-end pr-2" style={{width:`${Math.max(pct,8)}%`}}>
+                          <span className="text-[10px] font-bold text-white">{cat.stock}</span>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                );
-              })}
+                  );
+                })
+              )}
             </div>
           </div>
         </div>

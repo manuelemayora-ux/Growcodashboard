@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { Save, Store, Palette, Globe, Bell, Shield, Users } from "lucide-react";
+import { Save, Store, Globe, Shield } from "lucide-react";
 
 export default function ConfigPage() {
   const [storeName, setStoreName] = useState("Óptica Demo");

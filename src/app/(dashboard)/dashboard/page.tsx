@@ -1,10 +1,21 @@
 "use client";
 
-import { demoProducts, getDashboardStats } from "@/lib/demo-data";
+import { useDashboard } from "@/hooks/useDashboard";
 import { Package, TrendingUp, AlertTriangle, DollarSign, ArrowUpRight } from "lucide-react";
 
 export default function DashboardPage() {
-  const stats = getDashboardStats(demoProducts);
+  const { stats, isLoading } = useDashboard();
+
+  if (isLoading) {
+    return (
+      <div className="flex h-[60vh] items-center justify-center">
+        <div className="text-center">
+          <div className="h-10 w-10 animate-spin rounded-full border-4 border-[rgb(var(--cyan))] border-t-transparent mx-auto mb-4"></div>
+          <p className="text-sm font-semibold" style={{color:'rgb(var(--text-secondary))'}}>Cargando estadísticas...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="animate-fade-up">
@@ -81,11 +92,11 @@ export default function DashboardPage() {
           <div className="mt-4 flex items-baseline gap-4">
             <div>
               <span className="stat-value text-[rgb(var(--red-main))]">{stats.outOfStock}</span>
-              <span className="ml-1.5 text-xs font-medium text-[rgb(var(--text-secondary))]">agotados</span>
+              <span className="ml-1.5 text-xs font-medium style={{color:'rgb(var(--text-secondary))'}}">agotados</span>
             </div>
             <div>
               <span className="stat-value text-[rgb(var(--amber-main))]">{stats.lowStock}</span>
-              <span className="ml-1.5 text-xs font-medium text-[rgb(var(--text-secondary))]">bajos</span>
+              <span className="ml-1.5 text-xs font-medium style={{color:'rgb(var(--text-secondary))'}}">bajos</span>
             </div>
           </div>
         </div>
@@ -100,24 +111,30 @@ export default function DashboardPage() {
             <span className="badge-pill badge-dark">{stats.byCategory.length} categorías</span>
           </div>
           <div className="space-y-4">
-            {stats.byCategory.map((cat) => {
-              const maxCount = stats.byCategory[0].count;
-              const pct = (cat.count / maxCount) * 100;
-              return (
-                <div key={cat.name} className="flex items-center gap-4">
-                  <span className="w-28 text-sm font-medium text-[rgb(var(--text-secondary))] truncate">{cat.name}</span>
-                  <div className="flex-1 h-8 rounded-xl overflow-hidden bg-[rgb(var(--bg-input))]">
-                    <div
-                      className={`h-full rounded-xl transition-all flex items-center justify-end pr-3 ${pct === 100 ? 'glass-cyan' : 'bg-[rgb(var(--bg-dark))]'}`}
-                      style={{ width: `${Math.max(pct, 15)}%` }}
-                    >
-                      <span className="text-xs font-bold text-white">{cat.count}</span>
+            {stats.byCategory.length === 0 ? (
+              <div className="text-center py-10 text-sm font-semibold" style={{color:'rgb(var(--text-dim))'}}>
+                Aún no hay categorías con stock registrado
+              </div>
+            ) : (
+              stats.byCategory.map((cat) => {
+                const maxCount = stats.byCategory[0]?.count || 1;
+                const pct = (cat.count / maxCount) * 100;
+                return (
+                  <div key={cat.name} className="flex items-center gap-4">
+                    <span className="w-28 text-sm font-medium text-[rgb(var(--text-secondary))] truncate">{cat.name}</span>
+                    <div className="flex-1 h-8 rounded-xl overflow-hidden bg-[rgb(var(--bg-input))]">
+                      <div
+                        className={`h-full rounded-xl transition-all flex items-center justify-end pr-3 ${pct === 100 ? 'glass-cyan' : 'bg-[rgb(var(--bg-dark))]'}`}
+                        style={{ width: `${Math.max(pct, 15)}%` }}
+                      >
+                        <span className="text-xs font-bold text-white">{cat.count}</span>
+                      </div>
                     </div>
+                    <span className="font-mono-price text-xs font-medium w-14 text-right text-[rgb(var(--text-dim))]">{cat.stock} uds</span>
                   </div>
-                  <span className="font-mono-price text-xs font-medium w-14 text-right text-[rgb(var(--text-dim))]">{cat.stock} uds</span>
-                </div>
-              );
-            })}
+                );
+              })
+            )}
           </div>
         </div>
 
@@ -137,7 +154,7 @@ export default function DashboardPage() {
                   <div key={p.sku} className="flex items-center justify-between rounded-2xl p-3.5 transition-colors bg-[rgb(var(--bg-dark-card))] border border-[rgb(var(--border-dark))]">
                     <div className="min-w-0 flex-1 pr-3">
                       <div className="truncate text-sm font-semibold text-white">{p.name}</div>
-                      <div className="text-xs font-medium text-white/50 mt-0.5">{p.category}</div>
+                      <div className="text-xs font-medium text-white/50 mt-0.5">{p.category_name}</div>
                     </div>
                     <div className={`badge-pill ${p.stock <= 5 ? "badge-red" : "badge-amber"}`}>
                       {p.stock} uds
@@ -154,7 +171,6 @@ export default function DashboardPage() {
       <div className="mt-4 bento-card">
         <div className="mb-5 flex items-center justify-between">
           <h2 className="text-base font-bold text-[rgb(var(--bg-dark))]">Top Productos por Precio</h2>
-          <button className="btn-dark py-2 px-4 text-xs">Ver catálogo</button>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
@@ -171,11 +187,11 @@ export default function DashboardPage() {
             </thead>
             <tbody>
               {stats.topExpensive.map((p) => {
-                const margin = ((p.salePrice - p.costPrice) / p.salePrice * 100);
+                const margin = p.salePrice > 0 ? ((p.salePrice - p.costPrice) / p.salePrice * 100) : 0;
                 return (
-                  <tr key={p.sku} className="transition-colors hover:bg-[rgb(var(--bg-input))] border-b border-[rgb(var(--border))] last:border-0">
+                  <tr key={p.id} className="transition-colors hover:bg-[rgb(var(--bg-input))] border-b border-[rgb(var(--border))] last:border-0">
                     <td className="py-4 px-2 font-semibold text-[rgb(var(--bg-dark))]">{p.name}</td>
-                    <td className="py-4 px-2"><span className="badge-pill badge-cyan">{p.category}</span></td>
+                    <td className="py-4 px-2"><span className="badge-pill badge-cyan">{p.category_name}</span></td>
                     <td className="py-4 px-2 font-mono-price text-xs font-medium text-[rgb(var(--text-secondary))]">{p.sku}</td>
                     <td className="py-4 px-2 font-mono-price text-right font-medium">${p.costPrice.toFixed(2)}</td>
                     <td className="py-4 px-2 font-mono-price text-right font-extrabold text-[rgb(var(--bg-dark))]">${p.salePrice.toFixed(2)}</td>
@@ -188,6 +204,13 @@ export default function DashboardPage() {
                   </tr>
                 );
               })}
+              {stats.topExpensive.length === 0 && (
+                <tr>
+                  <td colSpan={7} className="py-10 text-center text-sm font-semibold" style={{color:'rgb(var(--text-dim))'}}>
+                    No hay productos disponibles
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>

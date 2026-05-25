@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Search, Plus, FileText, Calendar, DollarSign, Truck, Save, X } from "lucide-react";
+import { Search, Plus, FileText, DollarSign, Truck } from "lucide-react";
 
 interface PurchaseOrder { id:string; supplier:string; date:string; items:number; total:number; status:"pendiente"|"recibida"|"parcial"; }
 

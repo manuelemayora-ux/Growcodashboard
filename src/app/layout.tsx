@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import QueryProvider from "@/components/QueryProvider";
 
 export const metadata: Metadata = {
   title: "Stockly — Inventario y Ventas para PyMEs",
@@ -15,7 +16,9 @@ export default function RootLayout({
   return (
     <html lang="es">
       <body className="antialiased">
-        {children}
+        <QueryProvider>
+          {children}
+        </QueryProvider>
       </body>
     </html>
   );

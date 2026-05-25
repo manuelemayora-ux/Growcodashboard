@@ -1,37 +1,107 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { demoProducts, CATEGORIES, ProductData } from "@/lib/demo-data";
+import { useProductos, Product } from "@/hooks/useProductos";
 import { Search, Plus, ArrowUpRight, Edit3, Trash2, X, Save, Package } from "lucide-react";
 
 export default function ProductosPage() {
+  const { products, categories, isLoading, createProduct, updateProduct, deleteProduct } = useProductos();
+  
   const [search, setSearch] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("");
   const [stockFilter, setStockFilter] = useState<"all"|"low"|"out">("all");
-  const [products, setProducts] = useState<ProductData[]>(demoProducts);
   const [showModal, setShowModal] = useState(false);
-  const [editingSku, setEditingSku] = useState<string|null>(null);
-  const [form, setForm] = useState({ name:"", category:CATEGORIES[0], sku:"", cost:"", price:"", stock:"" });
+  const [editingId, setEditingId] = useState<string|null>(null);
+  const [form, setForm] = useState({ name:"", category:"", sku:"", cost:"", price:"", stock:"" });
 
-  const filtered = useMemo(() => products.filter(p => {
-    const s = !search || p.name.toLowerCase().includes(search.toLowerCase()) || p.sku.toLowerCase().includes(search.toLowerCase());
-    const c = !categoryFilter || p.category === categoryFilter;
-    const st = stockFilter==="all" || (stockFilter==="out"&&p.outOfStock) || (stockFilter==="low"&&p.stock>0&&p.stock<=10);
-    return s&&c&&st;
-  }), [search, categoryFilter, stockFilter, products]);
+  const filtered = useMemo(() => {
+    return products.filter(p => {
+      const s = !search || p.name.toLowerCase().includes(search.toLowerCase()) || p.sku.toLowerCase().includes(search.toLowerCase());
+      const c = !categoryFilter || p.category_name === categoryFilter;
+      const st = stockFilter==="all" || (stockFilter==="out"&&p.outOfStock) || (stockFilter==="low"&&p.stock>0&&p.stock<=10);
+      return s&&c&&st;
+    });
+  }, [search, categoryFilter, stockFilter, products]);
 
-  const openNew = () => { setEditingSku(null); setForm({ name:"", category:CATEGORIES[0], sku:`SKU-${Date.now().toString().slice(-6)}`, cost:"", price:"", stock:"" }); setShowModal(true); };
-  const openEdit = (p:ProductData) => { setEditingSku(p.sku); setForm({ name:p.name, category:p.category, sku:p.sku, cost:String(p.costPrice), price:String(p.salePrice), stock:String(p.stock) }); setShowModal(true); };
-
-  const save = () => {
-    const c=parseFloat(form.cost), pr=parseFloat(form.price), s=parseInt(form.stock);
-    if(!form.name||isNaN(c)||isNaN(pr)||isNaN(s)) return;
-    const np:ProductData = { name:form.name, category:form.category, sku:form.sku, costPrice:c, salePrice:pr, stock:s, date:new Date().toISOString().split("T")[0], outOfStock:s===0 };
-    setProducts(prev => editingSku ? prev.map(p=>p.sku===editingSku?np:p) : [np,...prev]);
-    setShowModal(false);
+  const openNew = () => { 
+    setEditingId(null); 
+    setForm({ 
+      name:"", 
+      category: categories[0]?.name || "Solar", 
+      sku:`SKU-${Date.now().toString().slice(-6)}`, 
+      cost:"", 
+      price:"", 
+      stock:"" 
+    }); 
+    setShowModal(true); 
   };
 
-  const del = (sku:string) => { if(confirm("¿Eliminar producto?")) setProducts(p=>p.filter(x=>x.sku!==sku)); };
+  const openEdit = (p: Product) => { 
+    setEditingId(p.id); 
+    setForm({ 
+      name:p.name, 
+      category:p.category_name || "Solar", 
+      sku:p.sku, 
+      cost:String(p.costPrice), 
+      price:String(p.salePrice), 
+      stock:String(p.stock) 
+    }); 
+    setShowModal(true); 
+  };
+
+  const save = async () => {
+    const c=parseFloat(form.cost), pr=parseFloat(form.price), s=parseInt(form.stock);
+    if(!form.name||isNaN(c)||isNaN(pr)||isNaN(s)) return;
+    
+    try {
+      if (editingId) {
+        await updateProduct.mutateAsync({
+          id: editingId,
+          name: form.name,
+          sku: form.sku,
+          category_name: form.category,
+          costPrice: c,
+          salePrice: pr,
+          stock: s,
+        });
+      } else {
+        await createProduct.mutateAsync({
+          name: form.name,
+          sku: form.sku,
+          category_name: form.category,
+          costPrice: c,
+          salePrice: pr,
+          stock: s,
+        });
+      }
+      setShowModal(false);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      alert("Error al guardar producto: " + msg);
+    }
+  };
+
+  const del = async (id: string) => { 
+    if(confirm("¿Eliminar producto?")) {
+      try {
+        await deleteProduct.mutateAsync(id);
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : String(err);
+        alert("Error al eliminar producto: " + msg);
+      }
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="flex h-[60vh] items-center justify-center">
+        <div className="text-center">
+          <div className="h-10 w-10 animate-spin rounded-full border-4 border-[rgb(var(--cyan))] border-t-transparent mx-auto mb-4"></div>
+          <p className="text-sm font-semibold" style={{color:'rgb(var(--text-secondary))'}}>Cargando productos...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="animate-fade-up">
@@ -50,7 +120,7 @@ export default function ProductosPage() {
         </div>
         <select value={categoryFilter} onChange={e=>setCategoryFilter(e.target.value)} className="bento-input w-auto min-w-[160px]">
           <option value="">Todas las categorías</option>
-          {CATEGORIES.map(c=><option key={c} value={c}>{c}</option>)}
+          {categories.map(c=><option key={c.id} value={c.name}>{c.name}</option>)}
         </select>
         <div className="flex gap-1">
           {([["all","Todos"],["low","Stock bajo"],["out","Agotados"]] as const).map(([v,l])=>(
@@ -77,16 +147,16 @@ export default function ProductosPage() {
             </thead>
             <tbody>
               {filtered.map(p => {
-                const m = ((p.salePrice-p.costPrice)/p.salePrice*100);
+                const m = p.salePrice > 0 ? ((p.salePrice-p.costPrice)/p.salePrice*100) : 0;
                 return (
-                  <tr key={p.sku} className="transition-colors hover:bg-[rgb(var(--bg-base))]" style={{borderBottom:'1px solid rgb(var(--border))'}}>
+                  <tr key={p.id} className="transition-colors hover:bg-[rgb(var(--bg-base))]" style={{borderBottom:'1px solid rgb(var(--border))'}}>
                     <td className="px-5 py-3.5 font-semibold text-[rgb(var(--bg-dark))]">{p.name}</td>
-                    <td className="px-5 py-3.5"><span className="badge-pill badge-blue">{p.category}</span></td>
+                    <td className="px-5 py-3.5"><span className="badge-pill badge-blue">{p.category_name}</span></td>
                     <td className="px-5 py-3.5 font-mono-price text-xs" style={{color:'rgb(var(--text-dim))'}}>{p.sku}</td>
                     <td className="px-5 py-3.5 font-mono-price text-right">${p.costPrice.toFixed(2)}</td>
                     <td className="px-5 py-3.5 font-mono-price text-right font-bold">${p.salePrice.toFixed(2)}</td>
                     <td className="px-5 py-3.5 text-right">
-                      <span className="inline-flex items-center gap-0.5 font-mono-price text-xs font-bold" style={{color:'rgb(var(--green-main))'}}><ArrowUpRight className="h-3 w-3"/>{m.toFixed(1)}%</span>
+                      <span className="inline-flex items-center gap-0.5 font-mono-price text-xs font-bold" style={{color: m >= 0 ? 'rgb(var(--green-main))' : 'rgb(var(--red-main))'}}><ArrowUpRight className="h-3 w-3"/>{m.toFixed(1)}%</span>
                     </td>
                     <td className="px-5 py-3.5 font-mono-price text-right">{p.stock}</td>
                     <td className="px-5 py-3.5 text-center">
@@ -95,12 +165,19 @@ export default function ProductosPage() {
                     <td className="px-5 py-3.5 text-center">
                       <div className="flex items-center justify-center gap-1">
                         <button onClick={()=>openEdit(p)} className="h-8 w-8 rounded-xl flex items-center justify-center hover:bg-[rgb(var(--bg-muted))] text-[rgb(var(--text-dim))] hover:text-[rgb(var(--cyan-bright))] transition-colors"><Edit3 className="h-4 w-4"/></button>
-                        <button onClick={()=>del(p.sku)} className="h-8 w-8 rounded-xl flex items-center justify-center hover:bg-[rgb(var(--red-dim))] text-[rgb(var(--text-dim))] hover:text-[rgb(var(--red-main))] transition-colors"><Trash2 className="h-4 w-4"/></button>
+                        <button onClick={()=>del(p.id)} className="h-8 w-8 rounded-xl flex items-center justify-center hover:bg-[rgb(var(--red-dim))] text-[rgb(var(--text-dim))] hover:text-[rgb(var(--red-main))] transition-colors"><Trash2 className="h-4 w-4"/></button>
                       </div>
                     </td>
                   </tr>
                 );
               })}
+              {filtered.length === 0 && (
+                <tr>
+                  <td colSpan={9} className="px-5 py-10 text-center text-sm font-semibold" style={{color:'rgb(var(--text-dim))'}}>
+                    No se encontraron productos
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>
@@ -112,12 +189,17 @@ export default function ProductosPage() {
             <button onClick={()=>setShowModal(false)} className="absolute right-6 top-6 text-[rgb(var(--text-dim))] hover:text-[rgb(var(--red-main))]"><X className="h-5 w-5"/></button>
             <div className="flex items-center gap-3 mb-6">
               <div className="h-10 w-10 rounded-xl glass-cyan flex items-center justify-center text-white"><Package className="h-5 w-5"/></div>
-              <h2 className="text-xl font-black text-[rgb(var(--bg-dark))]">{editingSku?"Editar Producto":"Nuevo Producto"}</h2>
+              <h2 className="text-xl font-black text-[rgb(var(--bg-dark))]">{editingId?"Editar Producto":"Nuevo Producto"}</h2>
             </div>
             <div className="space-y-4">
               <div><label className="stat-label mb-1.5 block">Nombre</label><input value={form.name} onChange={e=>setForm({...form,name:e.target.value})} className="bento-input" placeholder="ej: AeroLens PR-891"/></div>
               <div className="grid grid-cols-2 gap-4">
-                <div><label className="stat-label mb-1.5 block">Categoría</label><select value={form.category} onChange={e=>setForm({...form,category:e.target.value})} className="bento-input">{CATEGORIES.map(c=><option key={c}>{c}</option>)}</select></div>
+                <div>
+                  <label className="stat-label mb-1.5 block">Categoría</label>
+                  <select value={form.category} onChange={e=>setForm({...form,category:e.target.value})} className="bento-input">
+                    {categories.map(c=><option key={c.id} value={c.name}>{c.name}</option>)}
+                  </select>
+                </div>
                 <div><label className="stat-label mb-1.5 block">SKU</label><input value={form.sku} onChange={e=>setForm({...form,sku:e.target.value})} className="bento-input font-mono-price"/></div>
               </div>
               <div className="grid grid-cols-3 gap-4">
@@ -134,7 +216,7 @@ export default function ProductosPage() {
             </div>
             <div className="mt-6 flex gap-3 justify-end">
               <button onClick={()=>setShowModal(false)} className="btn-dark py-2.5 px-6 text-sm">Cancelar</button>
-              <button onClick={save} className="btn-primary py-2.5 px-6 text-sm"><Save className="h-4 w-4"/>{editingSku?"Guardar":"Crear"}</button>
+              <button onClick={save} className="btn-primary py-2.5 px-6 text-sm"><Save className="h-4 w-4"/>{editingId?"Guardar":"Crear"}</button>
             </div>
           </div>
         </div>

@@ -1,34 +1,36 @@
 "use client";
 
 import { useState } from "react";
-import { demoProducts } from "@/lib/demo-data";
+import { useProductos, Product } from "@/hooks/useProductos";
+import { useVentas, CartItem } from "@/hooks/useVentas";
 import { 
   Search, Plus, Minus, Trash2, ShoppingCart, 
-  CreditCard, Banknote, Landmark, ArrowRight, User
+  CreditCard, Banknote, Landmark, ArrowRight
 } from "lucide-react";
 
-interface CartItem {
-  sku: string;
-  name: string;
-  price: number;
-  quantity: number;
-  maxStock: number;
-}
+const paymentMethods = [
+  { id: "efectivo" as const, icon: Banknote, label: "Efectivo" },
+  { id: "tarjeta" as const, icon: CreditCard, label: "Tarjeta" },
+  { id: "transferencia" as const, icon: Landmark, label: "Transf." },
+] as const;
 
 export default function PosPage() {
+  const { products, isLoading: productsLoading } = useProductos();
+  const { checkoutSale } = useVentas();
+
   const [searchTerm, setSearchTerm] = useState("");
   const [cart, setCart] = useState<CartItem[]>([]);
   const [paymentMethod, setPaymentMethod] = useState<"efectivo" | "tarjeta" | "transferencia">("tarjeta");
   const [isProcessing, setIsProcessing] = useState(false);
 
   // Filter products for catalog
-  const filteredProducts = demoProducts.filter(p => 
+  const filteredProducts = products.filter(p => 
     (p.name.toLowerCase().includes(searchTerm.toLowerCase()) || p.sku.toLowerCase().includes(searchTerm.toLowerCase())) &&
     p.stock > 0
   );
 
   // Cart actions
-  const addToCart = (product: typeof demoProducts[0]) => {
+  const addToCart = (product: Product) => {
     setCart(prev => {
       const existing = prev.find(item => item.sku === product.sku);
       if (existing) {
@@ -65,21 +67,42 @@ export default function PosPage() {
     setCart(prev => prev.filter(item => item.sku !== sku));
   };
 
-  const handleCheckout = () => {
+  const handleCheckout = async () => {
     if (cart.length === 0) return;
     setIsProcessing(true);
-    // Simulate API call
-    setTimeout(() => {
+    try {
+      await checkoutSale.mutateAsync({
+        cart,
+        paymentMethod,
+        subtotal,
+        taxes,
+        total
+      });
       alert("¡Venta procesada con éxito!");
       setCart([]);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      alert("Error al cobrar la venta: " + msg);
+    } finally {
       setIsProcessing(false);
-    }, 800);
+    }
   };
 
   // Calculations
   const subtotal = cart.reduce((acc, item) => acc + (item.price * item.quantity), 0);
   const taxes = subtotal * 0.13; // 13% tax example
   const total = subtotal + taxes;
+
+  if (productsLoading) {
+    return (
+      <div className="flex h-[60vh] items-center justify-center">
+        <div className="text-center">
+          <div className="h-10 w-10 animate-spin rounded-full border-4 border-[rgb(var(--cyan))] border-t-transparent mx-auto mb-4"></div>
+          <p className="text-sm font-semibold" style={{color:'rgb(var(--text-secondary))'}}>Cargando catálogo...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col lg:flex-row gap-6 h-[calc(100vh-140px)] animate-fade-up">
@@ -101,92 +124,88 @@ export default function PosPage() {
           </div>
         </div>
 
-        {/* Product Grid */}
+        {/* Catalog Grid */}
         <div className="flex-1 overflow-y-auto p-6 bg-[rgb(var(--bg-base))]">
-          <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
-            {filteredProducts.map(product => (
-              <button 
-                key={product.sku}
-                onClick={() => addToCart(product)}
-                className="flex flex-col text-left bg-white p-4 rounded-[24px] border border-[rgb(var(--border))] hover:border-[rgb(var(--cyan-bright))] hover:shadow-[0_8px_24px_rgba(0,209,255,0.15)] transition-all group"
-              >
-                <div className="flex justify-between items-start w-full mb-3">
-                  <span className="badge-pill bg-[rgb(var(--bg-muted))] text-[rgb(var(--text-secondary))]">{product.category}</span>
-                  <span className="text-[10px] font-bold text-[rgb(var(--text-dim))]">Stock: {product.stock}</span>
-                </div>
-                <div className="font-bold text-[rgb(var(--bg-dark))] line-clamp-2 min-h-[40px] leading-tight">
-                  {product.name}
-                </div>
-                <div className="mt-auto pt-4 flex items-center justify-between w-full">
-                  <span className="font-mono-price text-lg font-black text-[rgb(var(--cyan-bright))] group-hover:text-[rgb(var(--blue-deep))] transition-colors">
-                    ${product.salePrice.toFixed(2)}
-                  </span>
-                  <div className="h-8 w-8 rounded-full bg-[rgb(var(--bg-muted))] flex items-center justify-center group-hover:bg-[rgb(var(--cyan))] group-hover:text-white transition-colors">
-                    <Plus className="h-4 w-4" />
+          {filteredProducts.length === 0 ? (
+            <div className="flex flex-col items-center justify-center h-full text-[rgb(var(--text-dim))]">
+              <ShoppingCart className="h-12 w-12 mb-3 opacity-20" />
+              <p className="text-sm font-semibold">No se encontraron productos disponibles</p>
+            </div>
+          ) : (
+            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+              {filteredProducts.map((p) => (
+                <div 
+                  key={p.id}
+                  onClick={() => addToCart(p)}
+                  className="bento-card bg-white p-5 cursor-pointer hover:shadow-lg hover:border-[rgb(var(--cyan-dim))] transition-all flex flex-col justify-between h-40 group"
+                >
+                  <div>
+                    <span className="badge-pill badge-cyan text-[10px]">{p.category_name}</span>
+                    <h3 className="font-bold text-[rgb(var(--bg-dark))] mt-2 line-clamp-1 group-hover:text-[rgb(var(--cyan-bright))] transition-colors">{p.name}</h3>
+                    <p className="text-xs font-mono text-[rgb(var(--text-dim))] mt-1">{p.sku}</p>
+                  </div>
+                  <div className="flex items-end justify-between mt-4">
+                    <span className="text-xl font-extrabold text-[rgb(var(--bg-dark))] font-mono-price">${p.salePrice.toFixed(2)}</span>
+                    <span className="text-xs font-bold text-[rgb(var(--text-dim))] bg-[rgb(var(--bg-input))] px-2.5 py-1 rounded-xl">{p.stock} uds</span>
                   </div>
                 </div>
-              </button>
-            ))}
-            {filteredProducts.length === 0 && (
-              <div className="col-span-full py-10 text-center text-[rgb(var(--text-dim))] font-bold">
-                No se encontraron productos
-              </div>
-            )}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
 
-      {/* RIGHT PANEL: CART / TICKET */}
-      <div className="w-full lg:w-[400px] flex flex-col min-h-0 bg-[rgb(var(--bg-dark))] rounded-[32px] shadow-2xl relative overflow-hidden shrink-0">
-        <div className="absolute -right-20 -bottom-20 w-80 h-80 bg-gradient-to-tr from-[rgb(var(--cyan-bright))] to-[rgb(var(--blue-deep))] blur-[80px] opacity-20 rounded-full pointer-events-none"></div>
+      {/* RIGHT PANEL: CART & CHECKOUT */}
+      <div className="w-full lg:w-[420px] flex flex-col min-h-0 bg-[rgb(var(--bg-dark))] rounded-[32px] shadow-xl overflow-hidden relative border border-white/5">
+        
+        {/* Decorative elements */}
+        <div className="absolute right-0 top-0 w-80 h-80 bg-[rgb(var(--cyan))] blur-[120px] opacity-10 pointer-events-none rounded-full"></div>
 
         {/* Cart Header */}
-        <div className="p-6 border-b border-white/10 flex items-center justify-between z-10 relative">
+        <div className="p-6 border-b border-white/5 z-10 relative flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-xl glass-cyan flex items-center justify-center text-white">
-              <ShoppingCart className="h-5 w-5" />
-            </div>
-            <h2 className="text-xl font-black text-white">Ticket</h2>
+            <div className="h-10 w-10 rounded-2xl glass-cyan flex items-center justify-center text-white"><ShoppingCart className="h-5 w-5" /></div>
+            <h2 className="text-xl font-black text-white">Detalle de Venta</h2>
           </div>
-          <button className="text-white/50 hover:text-white transition-colors">
-            <User className="h-5 w-5" />
-          </button>
+          <span className="badge-pill badge-lime text-xs font-black">{cart.reduce((s,i)=>s+i.quantity,0)} items</span>
         </div>
 
-        {/* Cart Items */}
-        <div className="flex-1 overflow-y-auto p-4 z-10 relative space-y-3">
+        {/* Cart Items List */}
+        <div className="flex-1 overflow-y-auto p-6 space-y-4 z-10 relative">
           {cart.length === 0 ? (
-            <div className="h-full flex flex-col items-center justify-center text-white/30 p-6 text-center">
-              <ShoppingCart className="h-12 w-12 mb-4 opacity-20" />
-              <p className="font-bold text-sm">El carrito está vacío</p>
-              <p className="text-xs mt-1">Busca un producto y agrégalo</p>
+            <div className="flex flex-col items-center justify-center h-full text-white/20">
+              <ShoppingCart className="h-16 w-16 mb-4 animate-bounce" />
+              <p className="text-sm font-semibold">El carrito está vacío</p>
+              <p className="text-xs mt-1 opacity-60">Selecciona productos de la izquierda</p>
             </div>
           ) : (
-            cart.map(item => (
-              <div key={item.sku} className="bg-white/5 border border-white/10 rounded-[20px] p-3 flex flex-col gap-3 backdrop-blur-sm">
-                <div className="flex justify-between items-start gap-2">
-                  <div className="font-bold text-white text-sm leading-tight">{item.name}</div>
-                  <button onClick={() => removeFromCart(item.sku)} className="text-white/30 hover:text-[rgb(var(--red-main))] transition-colors shrink-0">
+            cart.map((item) => (
+              <div key={item.sku} className="flex gap-4 p-4 rounded-2xl bg-white/5 border border-white/5 hover:border-white/10 transition-colors">
+                <div className="flex-1 min-w-0">
+                  <h4 className="text-sm font-bold text-white truncate">{item.name}</h4>
+                  <p className="text-xs font-mono text-white/40 mt-0.5">{item.sku}</p>
+                  <div className="text-sm font-extrabold text-[rgb(var(--cyan-bright))] font-mono-price mt-2">${(item.price * item.quantity).toFixed(2)}</div>
+                </div>
+                <div className="flex flex-col justify-between items-end">
+                  <button 
+                    onClick={() => removeFromCart(item.sku)}
+                    className="text-white/30 hover:text-[rgb(var(--red-main))] transition-colors"
+                  >
                     <Trash2 className="h-4 w-4" />
                   </button>
-                </div>
-                <div className="flex justify-between items-end">
-                  <div className="font-mono-price font-bold text-[rgb(var(--cyan-bright))]">
-                    ${(item.price * item.quantity).toFixed(2)}
-                  </div>
-                  <div className="flex items-center gap-3 bg-black/20 rounded-full px-2 py-1 border border-white/5">
+                  <div className="flex items-center gap-1 bg-white/5 rounded-xl border border-white/10 p-1">
                     <button 
                       onClick={() => updateQuantity(item.sku, -1)}
-                      className="text-white/50 hover:text-white transition-colors"
+                      className="h-6 w-6 rounded-lg flex items-center justify-center hover:bg-white/10 text-white/70 hover:text-white"
                     >
-                      <Minus className="h-4 w-4" />
+                      <Minus className="h-3 w-3" />
                     </button>
-                    <span className="font-bold text-white text-sm min-w-[1rem] text-center">{item.quantity}</span>
+                    <span className="w-8 text-center text-xs font-extrabold text-white font-mono-price">{item.quantity}</span>
                     <button 
                       onClick={() => updateQuantity(item.sku, 1)}
-                      className="text-white/50 hover:text-white transition-colors"
+                      className="h-6 w-6 rounded-lg flex items-center justify-center hover:bg-white/10 text-white/70 hover:text-white"
                     >
-                      <Plus className="h-4 w-4" />
+                      <Plus className="h-3 w-3" />
                     </button>
                   </div>
                 </div>
@@ -216,14 +235,10 @@ export default function PosPage() {
 
           {/* Payment Methods */}
           <div className="grid grid-cols-3 gap-2 mb-6">
-            {[
-              { id: "efectivo", icon: Banknote, label: "Efectivo" },
-              { id: "tarjeta", icon: CreditCard, label: "Tarjeta" },
-              { id: "transferencia", icon: Landmark, label: "Transf." },
-            ].map(pm => (
+            {paymentMethods.map(pm => (
               <button
                 key={pm.id}
-                onClick={() => setPaymentMethod(pm.id as any)}
+                onClick={() => setPaymentMethod(pm.id)}
                 className={`flex flex-col items-center justify-center gap-1.5 py-3 rounded-2xl border transition-all ${
                   paymentMethod === pm.id 
                     ? "bg-[rgb(var(--cyan))] border-[rgb(var(--cyan-bright))] text-white shadow-[0_4px_12px_rgba(0,209,255,0.3)]" 
@@ -249,7 +264,6 @@ export default function PosPage() {
               <ArrowRight className="h-5 w-5" />
             </div>
           </button>
-
         </div>
       </div>
     </div>
