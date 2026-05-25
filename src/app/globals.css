@@ -103,12 +103,19 @@
   to   { opacity: 1; transform: translateY(0); }
 }
 
+@keyframes float {
+  0% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-16px) rotate(0.8deg); }
+  100% { transform: translateY(0px) rotate(0deg); }
+}
+
 @layer utilities {
   .font-mono-price {
     font-family: 'JetBrains Mono', monospace;
     font-variant-numeric: tabular-nums;
   }
   .animate-fade-up { animation: fadeUp 0.35s ease; }
+  .animate-float { animation: float 6s ease-in-out infinite; }
 
   /* Glass effect para elementos de marca Growco */
   .glass-cyan {

@@ -7,11 +7,7 @@ import {
 
 export default function LandingPage() {
   return (
-    <div className="min-h-screen relative overflow-hidden" style={{ background: 'rgb(var(--bg-base))' }}>
-      {/* MASSIVE Decorative background elements */}
-      <div className="absolute top-0 right-0 w-[1200px] h-[1200px] opacity-40 pointer-events-none z-0 transform translate-x-1/4 -translate-y-1/4">
-        <Image src="/11.png" alt="Decorative" width={1200} height={1200} className="w-full h-full object-contain mix-blend-multiply" priority />
-      </div>
+    <div className="min-h-screen relative overflow-hidden" style={{ background: 'radial-gradient(120% 120% at 50% 10%, rgb(250, 251, 254) 50%, rgb(var(--bg-base)) 100%)' }}>
       
       {/* ---- HEADER ---- */}
       <header className="sticky top-0 z-50 bg-white/60 backdrop-blur-xl border-b border-[rgba(255,255,255,0.5)] shadow-sm">
@@ -44,20 +40,20 @@ export default function LandingPage() {
             <div className="relative z-20">
               <div className="mb-8 inline-flex items-center gap-3 rounded-full px-5 py-2 text-sm font-bold glass-cyan text-[rgb(var(--bg-dark))] shadow-lg border border-[rgba(0,209,255,0.3)]">
                 <span className="flex h-2.5 w-2.5 rounded-full animate-pulse" style={{ background: 'rgb(var(--accent))' }} />
-                Sistema de inventario premium
+                Implementación e integración llave en mano
               </div>
 
               <h1 className="text-5xl font-black leading-[1.1] tracking-tight md:text-[80px] text-[rgb(var(--bg-dark))] drop-shadow-sm">
-                Potencia tu operación con
+                Controla tu stock
                 <br />
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-[rgb(var(--blue-deep))] to-[rgb(var(--cyan-bright))]">
-                  tecnología de cristal.
+                  y acelera tus ventas.
                 </span>
               </h1>
 
               <p className="mt-8 max-w-xl text-xl leading-relaxed font-medium" style={{ color: 'rgb(var(--text-secondary))' }}>
-                Desarrollamos e implementamos un sistema completo de inventario y ventas. Con la potencia y estética de <strong className="text-[rgb(var(--bg-dark))]">Growco</strong>, 
-                diseño 3D y funcionalidad a la medida.
+                Desplegamos un sistema completo de inventario y facturación adaptado a tu empresa. Con la tecnología de <strong className="text-[rgb(var(--bg-dark))]">Growco</strong>, 
+                obtén flujos de trabajo optimizados y paneles analíticos en tiempo real para tu negocio.
               </p>
 
               <div className="mt-10 flex flex-col items-start gap-4 sm:flex-row">
@@ -72,9 +68,9 @@ export default function LandingPage() {
             </div>
             
             {/* HERO IMAGE - MASSIVE 3D GLASS G */}
-            <div className="relative flex justify-center lg:justify-end animate-fade-up">
-              <div className="absolute inset-0 bg-gradient-to-tr from-[rgb(var(--cyan))] to-[rgb(var(--blue-deep))] opacity-30 blur-[120px] rounded-full transform scale-150"></div>
-              <Image src="/12.png" alt="Growco 3D Glass Logo" width={800} height={800} className="w-full max-w-[700px] h-auto object-contain relative z-20 drop-shadow-[0_40px_80px_rgba(0,51,255,0.4)] transform hover:scale-105 transition-transform duration-700 ease-out" priority />
+            <div className="relative flex justify-center lg:justify-end animate-fade-up animate-float">
+              <div className="absolute inset-0 bg-gradient-to-tr from-[rgb(var(--cyan))] via-[rgb(var(--blue-deep))] to-[rgb(var(--cyan-bright))] opacity-45 blur-[130px] rounded-full transform scale-125"></div>
+              <Image src="/12.png" alt="Growco Logo" width={900} height={900} className="w-full max-w-[750px] md:max-w-[850px] h-auto object-contain relative z-20 drop-shadow-[0_50px_90px_rgba(0,51,255,0.45)] transform hover:scale-110 transition-transform duration-700 ease-out" priority />
             </div>
           </div>
         </div>
@@ -94,26 +90,19 @@ export default function LandingPage() {
             {/* Featured card — Cyan Glass (Massive Background) */}
             <div className="bento-cyan lg:col-span-2 flex flex-col justify-between min-h-[400px] relative overflow-hidden rounded-[40px] p-10 shadow-2xl">
               <div className="absolute -left-20 -bottom-20 w-[600px] h-[600px] bg-[rgb(var(--cyan-bright))] blur-[100px] opacity-40 rounded-full"></div>
-              
-              {/* Massive Decorative element 10 inside the card */}
-              <div className="absolute right-0 bottom-0 w-[500px] h-[500px] opacity-50 transform translate-x-1/4 translate-y-1/4 pointer-events-none mix-blend-overlay">
-                 <Image src="/10.png" alt="Decorative" fill className="object-contain" />
-              </div>
 
               <div className="relative z-10">
-                <span className="badge-pill bg-[rgb(var(--accent))] text-[rgb(var(--bg-dark))] px-4 py-1.5 text-sm mb-6">Adaptable a tu giro</span>
+                <span className="badge-pill bg-[rgb(var(--accent))] text-[rgb(var(--bg-dark))] px-4 py-1.5 text-sm mb-6">Adaptación Personalizada</span>
                 <h3 className="text-4xl font-black text-white mt-4 drop-shadow-md">
-                  Diseño de élite por Growco
+                  Alineado a tus Procesos Comerciales
                 </h3>
                 <p className="mt-6 text-white/90 max-w-xl text-lg font-medium leading-relaxed drop-shadow">
-                  Colores, logo, y flujos adaptados a tu operación. 
-                  Distribuidora, óptica, ferretería, boutique — 
-                  cada vertical tiene sus propios campos y lógica en cristal.
+                  Ajustamos la interfaz, los reportes y los campos del sistema según tu industria. Ya sea una óptica, distribuidora, ferretería o boutique, adaptamos la lógica para reflejar con exactitud tu flujo operativo real.
                 </p>
               </div>
               <div className="mt-10 flex gap-3 flex-wrap relative z-10">
                 <span className="badge-pill bg-white text-[rgb(var(--blue-deep))] px-5 py-2 text-sm shadow-lg">Ópticas</span>
-                <span className="badge-pill glass-cyan text-white px-5 py-2 text-sm border-white/30 backdrop-blur-xl">Llantas</span>
+                <span className="badge-pill glass-cyan text-white px-5 py-2 text-sm border-white/30 backdrop-blur-xl">Distribuidoras</span>
                 <span className="badge-pill glass-cyan text-white px-5 py-2 text-sm border-white/30 backdrop-blur-xl">Ferreterías</span>
                 <span className="badge-pill glass-cyan text-white px-5 py-2 text-sm border-white/30 backdrop-blur-xl">Boutiques</span>
               </div>
@@ -124,9 +113,9 @@ export default function LandingPage() {
                <div className="absolute inset-0 bg-gradient-to-br from-white/40 to-transparent"></div>
               <Palette className="h-16 w-16 text-[rgb(var(--text-on-accent))] relative z-10 drop-shadow-md" />
               <div className="relative z-10">
-                <h3 className="text-3xl font-black mt-6 leading-tight">Tu marca,<br/>tu sistema</h3>
+                <h3 className="text-3xl font-black mt-6 leading-tight">Presencia de<br/>tu Identidad</h3>
                 <p className="mt-4 text-base font-bold opacity-80 leading-relaxed text-[rgb(var(--bg-dark))]">
-                  No es un software genérico. Es TU herramienta con la identidad visual y calidad de Growco en 3D.
+                  No es un software genérico de marca blanca. El sistema se despliega con tu logotipo, colores corporativos y dominio propio, proyectando el máximo nivel de profesionalismo.
                 </p>
               </div>
             </div>
@@ -149,7 +138,7 @@ export default function LandingPage() {
               { icon: Package, title: "Inventario", desc: "Control multi-bodega con alertas de stock bajo y seguimiento en tiempo real.", tag: "Core" },
               { icon: ShoppingCart, title: "Punto de Venta", desc: "POS rápido con búsqueda por código, múltiples formas de pago y recibos.", tag: "Core" },
               { icon: BarChart3, title: "Reportes", desc: "Dashboard con métricas del día, productos top, márgenes y analíticas profundas.", tag: "Analíticas" },
-              { icon: Shield, title: "Seguridad Growco", desc: "Arquitectura segura, aislamiento de datos y respaldos automáticos.", tag: "Seguridad" },
+              { icon: Shield, title: "Seguridad y Respaldo", desc: "Arquitectura en la nube robusta, aislamiento completo de base de datos y copias de seguridad automáticas diarias.", tag: "Seguridad" },
               { icon: Users, title: "Clientes", desc: "Base de datos de clientes con historial de compras y perfiles.", tag: "CRM" },
               { icon: Boxes, title: "Multi-Sucursal", desc: "Administra múltiples tiendas y bodegas con transferencias de stock.", tag: "Operaciones" },
             ].map((m, i) => (
@@ -170,10 +159,6 @@ export default function LandingPage() {
 
       {/* ---- WHAT'S INCLUDED ---- */}
       <section className="px-6 py-32 relative overflow-hidden bg-white">
-        {/* Massive Background decorative 10 */}
-        <div className="absolute left-0 top-0 w-[1000px] h-[1000px] opacity-10 pointer-events-none transform -translate-x-1/4 -translate-y-1/4 mix-blend-multiply">
-          <Image src="/10.png" alt="Decorative" width={1000} height={1000} className="object-contain" />
-        </div>
 
         <div className="mx-auto max-w-5xl relative z-10">
           <div className="bento-dark p-12 md:p-20 relative overflow-hidden rounded-[48px] shadow-2xl border border-[rgba(255,255,255,0.1)]">
@@ -184,16 +169,16 @@ export default function LandingPage() {
             </h2>
             <div className="grid gap-6 sm:grid-cols-2 relative z-10">
               {[
-                "Sistema web completo y funcional",
-                "Diseño premium 3D por Growco",
-                "Base de datos segura en la nube",
-                "Multi-usuario con roles y permisos",
-                "Datos protegidos por empresa (RLS)",
-                "Integraciones API listas",
-                "Capacitación de uso intensiva",
-                "Soporte técnico experto",
-                "Panel de administración central",
-                "Responsive (funciona en celular)",
+                "Sistema web completo llave en mano",
+                "Carga e importación de tus datos de Excel",
+                "Base de datos en la nube de alta velocidad",
+                "Acceso multiusuario con roles jerárquicos",
+                "Protección de datos y cifrado SSL",
+                "Módulo de facturación rápida (POS)",
+                "Capacitación de uso para tu personal",
+                "Soporte técnico preferente experto",
+                "Panel administrativo centralizado",
+                "Plataforma responsive para celular y PC",
               ].map((item, i) => (
                 <div key={i} className="flex items-center gap-4">
                   <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-xl bg-[rgb(var(--accent))] shadow-[0_0_20px_rgba(204,255,0,0.4)]">
@@ -212,18 +197,13 @@ export default function LandingPage() {
         <div className="mx-auto max-w-5xl text-center">
           <div className="rounded-[48px] p-16 md:p-24 relative overflow-hidden glass-cyan border-[3px] border-[rgba(0,209,255,0.4)] shadow-[0_20px_80px_rgba(0,51,255,0.5)]">
             <div className="absolute inset-0 bg-gradient-to-r from-[rgb(var(--blue-deep))] to-[rgb(var(--cyan))] opacity-95"></div>
-            
-            {/* CTA Decorative */}
-            <div className="absolute -left-20 bottom-0 w-[400px] h-[400px] opacity-40 mix-blend-overlay pointer-events-none">
-                 <Image src="/11.png" alt="Decorative" fill className="object-contain" />
-            </div>
 
             <div className="relative z-10">
               <h2 className="text-4xl font-black md:text-6xl text-white tracking-tight drop-shadow-xl">
-                Experimenta el estándar Growco
+                Lleva el control de tu empresa al siguiente nivel
               </h2>
               <p className="mx-auto mt-6 max-w-2xl text-xl text-white font-semibold drop-shadow-md leading-relaxed">
-                Explorá el sistema con datos de demo. Todo lo que ves se puede adaptar milimétricamente a tu negocio en calidad 3D.
+                Explora el sistema con datos reales de prueba y comprueba su rapidez. Nos encargamos de todo el proceso de personalización e implantación técnica por ti.
               </p>
               <Link href="/login" className="btn-lime mt-12 inline-flex items-center justify-center gap-3 text-xl px-12 py-5 rounded-full shadow-[0_10px_30px_rgba(204,255,0,0.5)] hover:scale-105 transition-transform duration-300">
                 Explorar Demo
