@@ -1,8 +1,7 @@
 "use client";
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { createClient } from '@/lib/supabase/client';
-import { useTenant } from './useTenant';
+import { useProductos } from './useProductos';
 
 export interface CartItem {
   sku: string;
@@ -12,12 +11,64 @@ export interface CartItem {
   maxStock: number;
 }
 
-export function useVentas() {
-  const supabase = createClient();
-  const queryClient = useQueryClient();
-  const { data: profile } = useTenant();
+export interface Sale {
+  id: string;
+  date: string;
+  items: CartItem[];
+  paymentMethod: 'efectivo' | 'tarjeta' | 'transferencia';
+  subtotal: number;
+  taxes: number;
+  total: number;
+}
 
-  // Create checkout mutation
+const STORAGE_SALES_KEY = 'stockly_sales';
+const STORAGE_MOVEMENTS_KEY = 'stockly_inventory_movements';
+
+function getLocalSales(): Sale[] {
+  if (typeof window === 'undefined') return [];
+  try {
+    const stored = localStorage.getItem(STORAGE_SALES_KEY);
+    return stored ? JSON.parse(stored) : [];
+  } catch {
+    return [];
+  }
+}
+
+function saveLocalSales(sales: Sale[]) {
+  if (typeof window === 'undefined') return;
+  localStorage.setItem(STORAGE_SALES_KEY, JSON.stringify(sales));
+}
+
+function getLocalMovements() {
+  if (typeof window === 'undefined') return [];
+  try {
+    const stored = localStorage.getItem(STORAGE_MOVEMENTS_KEY);
+    return stored ? JSON.parse(stored) : [];
+  } catch {
+    return [];
+  }
+}
+
+interface LocalMovement {
+  id: string;
+  sku: string;
+  product: string;
+  type: 'entrada' | 'salida' | 'ajuste';
+  qty: number;
+  date: string;
+  note: string;
+}
+
+function saveLocalMovements(movs: LocalMovement[]) {
+  if (typeof window === 'undefined') return;
+  localStorage.setItem(STORAGE_MOVEMENTS_KEY, JSON.stringify(movs));
+}
+
+export function useVentas() {
+  const queryClient = useQueryClient();
+  const { products, updateProduct } = useProductos();
+
+  // Create checkout mutation (local mode)
   const checkoutSale = useMutation({
     mutationFn: async (variables: {
       cart: CartItem[];
@@ -26,124 +77,74 @@ export function useVentas() {
       taxes: number;
       total: number;
     }) => {
-      if (!profile?.tenant_id) throw new Error('Not authenticated');
+      const saleId = `sale-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+      const saleDate = new Date().toISOString();
 
-      // 1. Get main location
-      let { data: loc } = await supabase
-        .from('locations')
-        .select('id')
-        .eq('is_main', true)
-        .maybeSingle();
-
-      if (!loc) {
-        const { data: newLoc } = await supabase
-          .from('locations')
-          .insert({ tenant_id: profile.tenant_id, name: 'Tienda Principal', is_main: true })
-          .select()
-          .single();
-        loc = newLoc;
-      }
-
-      if (!loc) throw new Error('Could not resolve location');
-
-      // 2. Insert sale record
-      const { data: sale, error: saleErr } = await supabase
-        .from('sales')
-        .insert({
-          tenant_id: profile.tenant_id,
-          document_type: 'factura',
-          location_id: loc.id,
-          status: 'paid',
-          subtotal: variables.subtotal,
-          iva_amount: variables.taxes,
-          total: variables.total,
-          paid_amount: variables.total,
-          payment_method: variables.paymentMethod,
-          created_by: profile.id,
-          paid_at: new Date().toISOString(),
-          confirmed_at: new Date().toISOString(),
-        })
-        .select()
-        .single();
-
-      if (saleErr) throw saleErr;
-
-      // 3. Process each item in cart
+      // 1. Process each item in cart and deduct stock
       for (const item of variables.cart) {
-        // A. Resolve product ID from SKU
-        const { data: product } = await supabase
-          .from('products')
-          .select('id')
-          .eq('sku', item.sku)
-          .single();
-
-        if (!product) {
+        const prod = products.find(p => p.sku === item.sku);
+        if (!prod) {
           console.error(`Product not found for SKU: ${item.sku}`);
           continue;
         }
 
-        // B. Insert sale item line
-        const { error: itemErr } = await supabase
-          .from('sale_items')
-          .insert({
-            sale_id: sale.id,
-            product_id: product.id,
-            quantity: item.quantity,
-            unit_price: item.price,
-            line_total: item.price * item.quantity,
-          });
-
-        if (itemErr) throw itemErr;
-
-        // C. Fetch current stock to decrement
-        const { data: currInv } = await supabase
-          .from('inventory')
-          .select('quantity')
-          .eq('product_id', product.id)
-          .eq('location_id', loc.id)
-          .maybeSingle();
-
-        const currentStock = currInv?.quantity || 0;
+        const currentStock = prod.stock || 0;
         const newStock = Math.max(0, currentStock - item.quantity);
 
-        // D. Update inventory stock
-        const { error: invErr } = await supabase
-          .from('inventory')
-          .upsert({
-            tenant_id: profile.tenant_id,
-            product_id: product.id,
-            location_id: loc.id,
-            quantity: newStock,
-          }, { onConflict: 'product_id,location_id' });
-
-        if (invErr) throw invErr;
-
-        // E. Record inventory movement as sale
-        await supabase.from('inventory_movements').insert({
-          tenant_id: profile.tenant_id,
-          product_id: product.id,
-          location_id: loc.id,
-          type: 'sale',
-          quantity: -item.quantity,
-          unit_cost: item.price,
-          notes: `Venta POS POS-${sale.id.slice(-6).toUpperCase()}`,
-          created_by: profile.id,
+        // A. Update product stock in products hook (writes to local storage edits)
+        await updateProduct.mutateAsync({
+          id: prod.sku,
+          sku: prod.sku,
+          name: prod.name,
+          category_name: prod.category_name || 'General',
+          costPrice: prod.costPrice,
+          salePrice: prod.salePrice,
+          stock: newStock
         });
+
+        // B. Add inventory movement
+        const localMovs = getLocalMovements();
+        const newMovement = {
+          id: `mov-sale-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+          sku: prod.sku,
+          product: prod.name,
+          type: 'salida' as const,
+          qty: item.quantity,
+          date: saleDate.split('T')[0],
+          note: `Venta POS ${saleId.slice(-6).toUpperCase()}`
+        };
+        localMovs.unshift(newMovement);
+        saveLocalMovements(localMovs);
       }
 
-      return sale;
+      // 2. Save sale record to local sales history
+      const localSales = getLocalSales();
+      const newSale: Sale = {
+        id: saleId,
+        date: saleDate,
+        items: variables.cart,
+        paymentMethod: variables.paymentMethod,
+        subtotal: variables.subtotal,
+        taxes: variables.taxes,
+        total: variables.total
+      };
+      localSales.unshift(newSale);
+      saveLocalSales(localSales);
+
+      return newSale;
     },
     onSuccess: () => {
-      // Invalidate queries so that dashboard, products, and movements are re-fetched
+      // Invalidate queries so UI components refresh
       queryClient.invalidateQueries({ queryKey: ['products'] });
       queryClient.invalidateQueries({ queryKey: ['movements'] });
       queryClient.invalidateQueries({ queryKey: ['stock-summary'] });
-      queryClient.invalidateQueries({ queryKey: ['customers'] });
       queryClient.invalidateQueries({ queryKey: ['dashboard-stats'] });
+      queryClient.invalidateQueries({ queryKey: ['sales-history'] });
     },
   });
 
   return {
     checkoutSale,
+    sales: getLocalSales()
   };
 }

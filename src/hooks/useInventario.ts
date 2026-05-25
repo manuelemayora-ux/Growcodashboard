@@ -1,8 +1,7 @@
 "use client";
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { createClient } from '@/lib/supabase/client';
-import { useTenant } from './useTenant';
+import { useProductos } from './useProductos';
 
 export interface Movement {
   id: string;
@@ -14,87 +13,71 @@ export interface Movement {
   note: string;
 }
 
+const STORAGE_MOVEMENTS_KEY = 'stockly_inventory_movements';
+
+function getLocalMovements(): Movement[] {
+  if (typeof window === 'undefined') return [];
+  try {
+    const stored = localStorage.getItem(STORAGE_MOVEMENTS_KEY);
+    return stored ? JSON.parse(stored) : [];
+  } catch {
+    return [];
+  }
+}
+
+function saveLocalMovements(movements: Movement[]) {
+  if (typeof window === 'undefined') return;
+  localStorage.setItem(STORAGE_MOVEMENTS_KEY, JSON.stringify(movements));
+}
+
 export function useInventario() {
-  const supabase = createClient();
   const queryClient = useQueryClient();
-  const { data: profile } = useTenant();
+  const { products, updateProduct, isLoading: productsLoading } = useProductos();
 
   // 1. Fetch inventory movements
   const movementsQuery = useQuery({
     queryKey: ['movements'],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('inventory_movements')
-        .select(`
-          id,
-          type,
-          quantity,
-          created_at,
-          notes,
-          products(sku, name)
-        `)
-        .order('created_at', { ascending: false });
+      const localMovs = getLocalMovements();
 
-      if (error) throw error;
+      if (localMovs.length === 0 && products.length > 0) {
+        // Seed some initial movements from products to look realistic
+        const seeded: Movement[] = products.slice(0, 10).map((p, idx) => {
+          const qty = p.stock > 0 ? p.stock : 10;
+          return {
+            id: `seeded-mov-${p.sku}-${idx}`,
+            sku: p.sku,
+            product: p.name,
+            type: 'entrada' as const,
+            qty: qty,
+            date: p.date || new Date().toISOString().split('T')[0],
+            note: 'Inventario inicial (Google Sheets)'
+          };
+        });
+        saveLocalMovements(seeded);
+        return seeded;
+      }
 
-      return (data || []).map(m => {
-        // Map database movement type to UI types: 'purchase'/'return' -> 'entrada', 'sale' -> 'salida', 'adjustment' -> 'ajuste'
-        let uiType: 'entrada' | 'salida' | 'ajuste' = 'ajuste';
-        if (m.type === 'purchase' || (m.type === 'return' && m.quantity > 0)) {
-          uiType = 'entrada';
-        } else if (m.type === 'sale' || (m.type === 'return' && m.quantity < 0)) {
-          uiType = 'salida';
-        } else if (m.type === 'adjustment') {
-          uiType = 'ajuste';
-        }
-
-        const prod = m.products as unknown as { sku: string; name: string } | { sku: string; name: string }[] | null;
-        const prodObj = Array.isArray(prod) ? prod[0] : prod;
-
-        return {
-          id: m.id,
-          sku: prodObj?.sku || '',
-          product: prodObj?.name || 'Producto Desconocido',
-          type: uiType,
-          qty: m.quantity,
-          date: m.created_at ? m.created_at.split('T')[0] : '',
-          note: m.notes || '',
-        } as Movement;
-      });
+      return localMovs;
     },
-    enabled: !!profile?.tenant_id,
+    enabled: products.length > 0
   });
 
-  // 2. Fetch inventory stock counts (totals, low stock, out of stock)
+  // 2. Fetch inventory stock counts (totals, low stock, out of stock) dynamically from products hook
   const stockSummaryQuery = useQuery({
     queryKey: ['stock-summary'],
     queryFn: async () => {
-      const { data: products, error } = await supabase
-        .from('products')
-        .select(`
-          id,
-          name,
-          sku,
-          categories(name),
-          inventory(quantity)
-        `)
-        .eq('active', true);
-
-      if (error) throw error;
-
       let totalUnits = 0;
       let lowStockCount = 0;
       let outOfStockCount = 0;
       const lowStockProducts: { sku: string; name: string; category: string; stock: number }[] = [];
       const stockByCategory: { [key: string]: number } = {};
 
-      (products || []).forEach(p => {
-        const stock = (p.inventory || []).reduce((acc: number, inv: { quantity: number }) => acc + (inv.quantity || 0), 0);
+      products.forEach(p => {
+        const stock = p.stock || 0;
         totalUnits += stock;
 
-        const cat = p.categories as unknown as { name: string } | { name: string }[] | null;
-        const catObj = Array.isArray(cat) ? cat[0] : cat;
-        const catName = catObj?.name || 'General';
+        const catName = p.category_name || 'General';
 
         if (stock === 0) {
           outOfStockCount++;
@@ -119,85 +102,60 @@ export function useInventario() {
         stockByCategory: Object.entries(stockByCategory).map(([name, stock]) => ({ name, stock })),
       };
     },
-    enabled: !!profile?.tenant_id,
+    enabled: products.length > 0
   });
 
   // 3. Manual stock adjustment mutation
   const adjustStock = useMutation({
     mutationFn: async (variables: {
-      productId: string;
+      productId: string; // SKU
       quantity: number;
       type: 'entrada' | 'salida' | 'ajuste';
       notes: string;
     }) => {
-      if (!profile?.tenant_id) throw new Error('Not authenticated');
+      const prod = products.find(p => p.sku === variables.productId);
+      if (!prod) throw new Error('Product not found');
 
-      // A. Get main location
-      let { data: loc } = await supabase
-        .from('locations')
-        .select('id')
-        .eq('is_main', true)
-        .maybeSingle();
-
-      if (!loc) {
-        const { data: newLoc } = await supabase
-          .from('locations')
-          .insert({ tenant_id: profile.tenant_id, name: 'Tienda Principal', is_main: true })
-          .select()
-          .single();
-        loc = newLoc;
-      }
-
-      if (!loc) throw new Error('Could not resolve location');
-
-      // B. Fetch current inventory stock
-      const { data: currInv } = await supabase
-        .from('inventory')
-        .select('quantity')
-        .eq('product_id', variables.productId)
-        .eq('location_id', loc.id)
-        .maybeSingle();
-
-      const currentStock = currInv?.quantity || 0;
+      const currentStock = prod.stock || 0;
       let newStock = currentStock;
       let diff = variables.quantity;
 
       if (variables.type === 'entrada') {
         newStock = currentStock + variables.quantity;
+        diff = variables.quantity;
       } else if (variables.type === 'salida') {
-        newStock = currentStock - variables.quantity;
+        newStock = Math.max(0, currentStock - variables.quantity);
         diff = -variables.quantity;
       } else { // ajuste directo
         newStock = variables.quantity;
         diff = variables.quantity - currentStock;
       }
 
-      // C. Update inventory
-      const { error: invErr } = await supabase
-        .from('inventory')
-        .upsert({
-          tenant_id: profile.tenant_id,
-          product_id: variables.productId,
-          location_id: loc.id,
-          quantity: newStock,
-        }, { onConflict: 'product_id,location_id' });
+      // A. Update stock in products hook (saves to localStorage/modifications)
+      await updateProduct.mutateAsync({
+        id: prod.sku,
+        sku: prod.sku,
+        name: prod.name,
+        category_name: prod.category_name || 'General',
+        costPrice: prod.costPrice,
+        salePrice: prod.salePrice,
+        stock: newStock
+      });
 
-      if (invErr) throw invErr;
+      // B. Save movement record
+      const localMovs = getLocalMovements();
+      const newMovement: Movement = {
+        id: `mov-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        sku: prod.sku,
+        product: prod.name,
+        type: variables.type,
+        qty: Math.abs(diff),
+        date: new Date().toISOString().split('T')[0],
+        note: variables.notes || 'Ajuste manual de stock'
+      };
 
-      // D. Record movement
-      const { error: movErr } = await supabase
-        .from('inventory_movements')
-        .insert({
-          tenant_id: profile.tenant_id,
-          product_id: variables.productId,
-          location_id: loc.id,
-          type: 'adjustment',
-          quantity: diff,
-          notes: variables.notes,
-          created_by: profile.id,
-        });
-
-      if (movErr) throw movErr;
+      localMovs.unshift(newMovement);
+      saveLocalMovements(localMovs);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['movements'] });
@@ -206,10 +164,12 @@ export function useInventario() {
     },
   });
 
+  const isLoading = productsLoading || movementsQuery.isLoading || stockSummaryQuery.isLoading;
+
   return {
     movements: movementsQuery.data || [],
     summary: stockSummaryQuery.data || { totalUnits: 0, lowStockCount: 0, outOfStockCount: 0, lowStockProducts: [], stockByCategory: [] },
-    isLoading: movementsQuery.isLoading || stockSummaryQuery.isLoading,
+    isLoading: isLoading,
     isError: movementsQuery.isError || stockSummaryQuery.isError,
     error: movementsQuery.error || stockSummaryQuery.error,
     adjustStock,

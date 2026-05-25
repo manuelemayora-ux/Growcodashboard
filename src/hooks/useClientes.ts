@@ -1,8 +1,6 @@
 "use client";
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { createClient } from '@/lib/supabase/client';
-import { useTenant } from './useTenant';
 
 export interface Customer {
   id: string;
@@ -14,51 +12,43 @@ export interface Customer {
   lastPurchase: string;
 }
 
-export function useClientes() {
-  const supabase = createClient();
-  const queryClient = useQueryClient();
-  const { data: profile } = useTenant();
+const STORAGE_CUSTOMERS_KEY = 'stockly_customers';
 
-  // 1. Fetch customers and calculate sales aggregates
+const DEFAULT_CUSTOMERS: Customer[] = [
+  { id: 'c-1', name: 'Ana Gómez', email: 'ana.gomez@gmail.com', phone: '2255-8888', address: 'San Salvador, El Salvador', totalPurchases: 1540.50, lastPurchase: '2026-05-12' },
+  { id: 'c-2', name: 'Roberto Carlos', email: 'roberto.c@outlook.com', phone: '2541-9999', address: 'Santa Tecla, La Libertad', totalPurchases: 320.00, lastPurchase: '2026-05-18' },
+  { id: 'c-3', name: 'María Hernández', email: 'maria.h@growco.com', phone: '2233-4455', address: 'Antiguo Cuscatlán', totalPurchases: 2450.75, lastPurchase: '2026-05-24' }
+];
+
+function getLocalCustomers(): Customer[] {
+  if (typeof window === 'undefined') return [];
+  try {
+    const stored = localStorage.getItem(STORAGE_CUSTOMERS_KEY);
+    return stored ? JSON.parse(stored) : [];
+  } catch {
+    return [];
+  }
+}
+
+function saveLocalCustomers(customers: Customer[]) {
+  if (typeof window === 'undefined') return;
+  localStorage.setItem(STORAGE_CUSTOMERS_KEY, JSON.stringify(customers));
+}
+
+export function useClientes() {
+  const queryClient = useQueryClient();
+
+  // 1. Fetch customers
   const customersQuery = useQuery({
     queryKey: ['customers'],
     queryFn: async () => {
-      // Query customers and aggregate sales
-      const { data, error } = await supabase
-        .from('customers')
-        .select(`
-          *,
-          sales(total, created_at)
-        `)
-        .is('deleted_at', null)
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-
-      return (data || []).map(c => {
-        const sales = c.sales || [];
-        const totalPurchases = sales.reduce((acc: number, sale: { total: number }) => acc + Number(sale.total || 0), 0);
-        let lastPurchase = '-';
-        if (sales.length > 0) {
-          // Sort sales by date desc
-          const sorted = [...sales].sort((a: { created_at: string }, b: { created_at: string }) => 
-            new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-          );
-          lastPurchase = sorted[0].created_at ? sorted[0].created_at.split('T')[0] : '-';
-        }
-
-        return {
-          id: c.id,
-          name: c.name,
-          email: c.email || '',
-          phone: c.phone || '',
-          address: c.address || '',
-          totalPurchases,
-          lastPurchase,
-        } as Customer;
-      });
-    },
-    enabled: !!profile?.tenant_id,
+      const stored = getLocalCustomers();
+      if (stored.length === 0) {
+        saveLocalCustomers(DEFAULT_CUSTOMERS);
+        return DEFAULT_CUSTOMERS;
+      }
+      return stored;
+    }
   });
 
   // 2. Create customer mutation
@@ -69,23 +59,20 @@ export function useClientes() {
       phone: string;
       address: string;
     }) => {
-      if (!profile?.tenant_id) throw new Error('Not authenticated');
-
-      const { data, error } = await supabase
-        .from('customers')
-        .insert({
-          tenant_id: profile.tenant_id,
-          name: variables.name,
-          email: variables.email,
-          phone: variables.phone,
-          address: variables.address,
-          created_by: profile.id,
-        })
-        .select()
-        .single();
-
-      if (error) throw error;
-      return data;
+      const customers = getLocalCustomers();
+      const newCustomer: Customer = {
+        id: `cust-${Date.now()}`,
+        name: variables.name,
+        email: variables.email || '',
+        phone: variables.phone || '',
+        address: variables.address || '',
+        totalPurchases: 0,
+        lastPurchase: '-'
+      };
+      
+      customers.unshift(newCustomer);
+      saveLocalCustomers(customers);
+      return newCustomer;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['customers'] });
@@ -101,35 +88,32 @@ export function useClientes() {
       phone: string;
       address: string;
     }) => {
-      if (!profile?.tenant_id) throw new Error('Not authenticated');
-
-      const { error } = await supabase
-        .from('customers')
-        .update({
-          name: variables.name,
-          email: variables.email,
-          phone: variables.phone,
-          address: variables.address,
-          updated_by: profile.id,
-        })
-        .eq('id', variables.id);
-
-      if (error) throw error;
+      const customers = getLocalCustomers();
+      const updated = customers.map(c => {
+        if (c.id === variables.id) {
+          return {
+            ...c,
+            name: variables.name,
+            email: variables.email,
+            phone: variables.phone,
+            address: variables.address
+          };
+        }
+        return c;
+      });
+      saveLocalCustomers(updated);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['customers'] });
     },
   });
 
-  // 4. Delete customer mutation (soft delete)
+  // 4. Delete customer mutation
   const deleteCustomer = useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase
-        .from('customers')
-        .update({ deleted_at: new Date().toISOString() })
-        .eq('id', id);
-
-      if (error) throw error;
+      const customers = getLocalCustomers();
+      const filtered = customers.filter(c => c.id !== id);
+      saveLocalCustomers(filtered);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['customers'] });

@@ -45,15 +45,20 @@ export async function updateSession(request: NextRequest) {
   // Refrescar la sesión
   const { data: { user } } = await supabase.auth.getUser()
 
-  // Rutas protegidas
+  // Rutas protegidas (comentadas por desuso de RLS temporal)
+  /*
   const protectedPrefixes = ['/dashboard', '/inventario', '/productos', '/ventas', '/clientes', '/compras', '/proveedores', '/reportes', '/configuracion', '/onboarding']
   const isProtected = protectedPrefixes.some(p => request.nextUrl.pathname.startsWith(p))
+  */
 
+  // Desactivado para modo directo de Google Sheets + localStorage
+  /*
   if (isProtected && !user) {
     const loginUrl = new URL('/login', request.url)
     loginUrl.searchParams.set('redirect', request.nextUrl.pathname)
     return NextResponse.redirect(loginUrl)
   }
+  */
 
   // Redirigir si ya logueado y va a auth
   const authRoutes = ['/login', '/signup']

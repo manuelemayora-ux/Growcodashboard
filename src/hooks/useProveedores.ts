@@ -1,8 +1,6 @@
 "use client";
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { createClient } from '@/lib/supabase/client';
-import { useTenant } from './useTenant';
 
 export interface Supplier {
   id: string;
@@ -14,49 +12,43 @@ export interface Supplier {
   lastOrder: string;
 }
 
-export function useProveedores() {
-  const supabase = createClient();
-  const queryClient = useQueryClient();
-  const { data: profile } = useTenant();
+const STORAGE_SUPPLIERS_KEY = 'stockly_suppliers';
 
-  // 1. Fetch suppliers and calculate aggregates
+const DEFAULT_SUPPLIERS: Supplier[] = [
+  { id: 's-1', name: 'Distribuidora Global', contact: 'Juan Pérez', email: 'contacto@distglobal.com', phone: '2244-1111', products: 12, lastOrder: '2026-05-10' },
+  { id: 's-2', name: 'Ópticas Asociadas Mayoristas', contact: 'Sofía López', email: 'ventas@opticasasoc.com', phone: '2511-2222', products: 8, lastOrder: '2026-05-15' },
+  { id: 's-3', name: 'Importaciones Lux', contact: 'Carlos Ramos', email: 'cramos@importlux.com', phone: '2288-7777', products: 24, lastOrder: '2026-05-22' }
+];
+
+function getLocalSuppliers(): Supplier[] {
+  if (typeof window === 'undefined') return [];
+  try {
+    const stored = localStorage.getItem(STORAGE_SUPPLIERS_KEY);
+    return stored ? JSON.parse(stored) : [];
+  } catch {
+    return [];
+  }
+}
+
+function saveLocalSuppliers(suppliers: Supplier[]) {
+  if (typeof window === 'undefined') return;
+  localStorage.setItem(STORAGE_SUPPLIERS_KEY, JSON.stringify(suppliers));
+}
+
+export function useProveedores() {
+  const queryClient = useQueryClient();
+
+  // 1. Fetch suppliers
   const suppliersQuery = useQuery({
     queryKey: ['suppliers'],
     queryFn: async () => {
-      // Query suppliers and join purchases
-      const { data, error } = await supabase
-        .from('suppliers')
-        .select(`
-          *,
-          purchases(created_at, total)
-        `)
-        .is('deleted_at', null)
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-
-      return (data || []).map(s => {
-        const purchases = s.purchases || [];
-        let lastOrder = '-';
-        if (purchases.length > 0) {
-          const sorted = [...purchases].sort((a: { created_at: string }, b: { created_at: string }) => 
-            new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-          );
-          lastOrder = sorted[0].created_at ? sorted[0].created_at.split('T')[0] : '-';
-        }
-
-        return {
-          id: s.id,
-          name: s.name,
-          contact: s.contact_name || '',
-          email: s.email || '',
-          phone: s.phone || '',
-          products: purchases.length, // Display number of purchase orders as proxy
-          lastOrder,
-        } as Supplier;
-      });
-    },
-    enabled: !!profile?.tenant_id,
+      const stored = getLocalSuppliers();
+      if (stored.length === 0) {
+        saveLocalSuppliers(DEFAULT_SUPPLIERS);
+        return DEFAULT_SUPPLIERS;
+      }
+      return stored;
+    }
   });
 
   // 2. Create supplier mutation
@@ -67,23 +59,20 @@ export function useProveedores() {
       email: string;
       phone: string;
     }) => {
-      if (!profile?.tenant_id) throw new Error('Not authenticated');
-
-      const { data, error } = await supabase
-        .from('suppliers')
-        .insert({
-          tenant_id: profile.tenant_id,
-          name: variables.name,
-          contact_name: variables.contact,
-          email: variables.email,
-          phone: variables.phone,
-          created_by: profile.id,
-        })
-        .select()
-        .single();
-
-      if (error) throw error;
-      return data;
+      const suppliers = getLocalSuppliers();
+      const newSupplier: Supplier = {
+        id: `supp-${Date.now()}`,
+        name: variables.name,
+        contact: variables.contact || '',
+        email: variables.email || '',
+        phone: variables.phone || '',
+        products: 0,
+        lastOrder: '-'
+      };
+      
+      suppliers.unshift(newSupplier);
+      saveLocalSuppliers(suppliers);
+      return newSupplier;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['suppliers'] });
@@ -99,35 +88,32 @@ export function useProveedores() {
       email: string;
       phone: string;
     }) => {
-      if (!profile?.tenant_id) throw new Error('Not authenticated');
-
-      const { error } = await supabase
-        .from('suppliers')
-        .update({
-          name: variables.name,
-          contact_name: variables.contact,
-          email: variables.email,
-          phone: variables.phone,
-          updated_by: profile.id,
-        })
-        .eq('id', variables.id);
-
-      if (error) throw error;
+      const suppliers = getLocalSuppliers();
+      const updated = suppliers.map(s => {
+        if (s.id === variables.id) {
+          return {
+            ...s,
+            name: variables.name,
+            contact: variables.contact,
+            email: variables.email,
+            phone: variables.phone
+          };
+        }
+        return s;
+      });
+      saveLocalSuppliers(updated);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['suppliers'] });
     },
   });
 
-  // 4. Delete supplier mutation (soft delete)
+  // 4. Delete supplier mutation
   const deleteSupplier = useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase
-        .from('suppliers')
-        .update({ deleted_at: new Date().toISOString() })
-        .eq('id', id);
-
-      if (error) throw error;
+      const suppliers = getLocalSuppliers();
+      const filtered = suppliers.filter(s => s.id !== id);
+      saveLocalSuppliers(filtered);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['suppliers'] });

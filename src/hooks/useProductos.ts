@@ -1,8 +1,6 @@
 "use client";
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { createClient } from '@/lib/supabase/client';
-import { useTenant } from './useTenant';
 
 export interface Product {
   id: string;
@@ -23,86 +21,140 @@ export interface Product {
   date: string;
 }
 
-export function useProductos() {
-  const supabase = createClient();
-  const queryClient = useQueryClient();
-  const { data: profile } = useTenant();
+export interface Category {
+  id: string;
+  name: string;
+  color?: string;
+}
 
-  // 1. Fetch products
+const BRANDS = [
+  'Gucci', 'Vogue Eyewear', 'Vogue', 'Dolce & Gabbana', 'Dolce', 'Fendi', 
+  'Carrera', 'Prada', 'Tom Ford', 'Armani Exchange', 'Armani', 'Tiffany & Co.', 
+  'Tiffany', 'Balenciaga', 'Maui Jim', 'Burberry', 'Michael Kors', 'Ray-Ban', 
+  'Coach', 'Versace', 'Persol', 'Hugo Boss', 'Saint Laurent', 'Oakley'
+];
+
+function detectBrand(name: string): string {
+  for (const brand of BRANDS) {
+    if (name.toLowerCase().startsWith(brand.toLowerCase())) {
+      return brand;
+    }
+  }
+  return name.split(' ')[0] || 'Genérico';
+}
+
+// LocalStorage helpers
+const STORAGE_MODS_KEY = 'stockly_products_modifications';
+const STORAGE_NEW_KEY = 'stockly_new_products';
+
+function getLocalModifications(): Record<string, Partial<Product> & { deleted?: boolean }> {
+  if (typeof window === 'undefined') return {};
+  try {
+    const stored = localStorage.getItem(STORAGE_MODS_KEY);
+    return stored ? JSON.parse(stored) : {};
+  } catch {
+    return {};
+  }
+}
+
+function saveLocalModifications(mods: Record<string, Partial<Product> & { deleted?: boolean }>) {
+  if (typeof window === 'undefined') return;
+  localStorage.setItem(STORAGE_MODS_KEY, JSON.stringify(mods));
+}
+
+function getLocalNewProducts(): Product[] {
+  if (typeof window === 'undefined') return [];
+  try {
+    const stored = localStorage.getItem(STORAGE_NEW_KEY);
+    return stored ? JSON.parse(stored) : [];
+  } catch {
+    return [];
+  }
+}
+
+function saveLocalNewProducts(products: Product[]) {
+  if (typeof window === 'undefined') return;
+  localStorage.setItem(STORAGE_NEW_KEY, JSON.stringify(products));
+}
+
+export function useProductos() {
+  const queryClient = useQueryClient();
+
+  // 1. Fetch & Merge Products
   const productsQuery = useQuery({
     queryKey: ['products'],
     queryFn: async () => {
-      // Query products, join categories and inventory
-      const { data, error } = await supabase
-        .from('products')
-        .select(`
-          *,
-          categories(name),
-          inventory(quantity)
-        `)
-        .eq('active', true)
-        .order('created_at', { ascending: false });
+      let remoteProducts: Product[] = [];
 
-      if (error) throw error;
+      try {
+        const res = await fetch('/api/products-sheet');
+        if (!res.ok) throw new Error('Failed to fetch from sheet API');
+        remoteProducts = await res.json();
+      } catch (err) {
+        console.error("Error fetching Google Sheet via API, using empty baseline:", err);
+      }
 
-      return (data || []).map(p => {
-        // Calculate total stock from inventory array
-        const totalStock = (p.inventory || []).reduce((acc: number, inv: { quantity: number }) => acc + (inv.quantity || 0), 0);
-        return {
-          id: p.id,
-          sku: p.sku,
-          barcode: p.barcode || '',
-          name: p.name,
-          description: p.description || '',
-          category_id: p.category_id,
-          category_name: p.categories?.name || 'General',
-          brand: p.brand || '',
-          base_unit: p.base_unit || 'unidad',
-          costPrice: Number(p.cost_price || 0),
-          salePrice: Number(p.sale_price || 0),
-          stock: totalStock,
-          tax_rate: Number(p.tax_rate || 0.13),
-          active: p.active,
-          outOfStock: totalStock <= 0,
-          date: p.created_at ? p.created_at.split('T')[0] : '',
-        } as Product;
-      });
-    },
-    enabled: !!profile?.tenant_id,
+      // Merge with localStorage updates
+      const modifications = getLocalModifications();
+      const newProducts = getLocalNewProducts();
+
+      // Apply modifications to remote products
+      const mergedProducts = remoteProducts.map(p => {
+        const mod = modifications[p.sku];
+        if (mod) {
+          if (mod.deleted) return null; // Filter out deleted ones later
+          return { ...p, ...mod } as Product;
+        }
+        return p;
+      }).filter(Boolean) as Product[];
+
+      // Append new products
+      const finalProducts = [...newProducts, ...mergedProducts];
+
+      // Update outOfStock status dynamically
+      return finalProducts.map(p => ({
+        ...p,
+        outOfStock: p.stock <= 0
+      }));
+    }
   });
 
-  // 2. Fetch categories
+  // 2. Derive Categories from active products
   const categoriesQuery = useQuery({
     queryKey: ['categories'],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('categories')
-        .select('*')
-        .order('name');
+      const prods = productsQuery.data || [];
+      const catsSet = new Set<string>();
+      const catsList: Category[] = [];
 
-      if (error) throw error;
+      prods.forEach(p => {
+        if (p.category_name) catsSet.add(p.category_name);
+      });
 
-      // Auto-seed default categories if empty
-      if (data && data.length === 0 && profile?.tenant_id) {
-        const defaultCats = ["Solar", "Oftálmico", "Blue Light", "Sport", "Lectura"];
-        const inserts = defaultCats.map(name => ({
-          tenant_id: profile.tenant_id,
-          name,
-        }));
-        const { data: seeded, error: seedErr } = await supabase
-          .from('categories')
-          .insert(inserts)
-          .select();
-        if (seedErr) throw seedErr;
-        return seeded || [];
+      catsSet.forEach(name => {
+        catsList.push({
+          id: name.toLowerCase().replace(/\s+/g, '-'),
+          name: name,
+          color: '#00D1FF' // Signature Cyan Accent
+        });
+      });
+
+      if (catsList.length === 0) {
+        return [
+          { id: 'solar', name: 'Solar' },
+          { id: 'oftalmico', name: 'Oftálmico' },
+          { id: 'blue-light', name: 'Blue Light' },
+          { id: 'sport', name: 'Sport' },
+          { id: 'lectura', name: 'Lectura' }
+        ];
       }
 
-      return data || [];
+      return catsList;
     },
-    enabled: !!profile?.tenant_id,
+    enabled: !!productsQuery.data
   });
 
-  // 3. Create product mutation
+  // 3. Create Product
   const createProduct = useMutation({
     mutationFn: async (variables: {
       name: string;
@@ -112,102 +164,41 @@ export function useProductos() {
       salePrice: number;
       stock: number;
     }) => {
-      if (!profile?.tenant_id) throw new Error('Not authenticated');
+      const newProds = getLocalNewProducts();
+      
+      const newProd: Product = {
+        id: variables.sku,
+        sku: variables.sku,
+        barcode: variables.sku,
+        name: variables.name,
+        description: 'Producto registrado localmente.',
+        category_id: variables.category_name.toLowerCase().replace(/\s+/g, '-'),
+        category_name: variables.category_name,
+        brand: detectBrand(variables.name),
+        base_unit: 'unidad',
+        costPrice: Number(variables.costPrice || 0),
+        salePrice: Number(variables.salePrice || 0),
+        stock: Number(variables.stock || 0),
+        tax_rate: 0.13,
+        active: true,
+        outOfStock: variables.stock <= 0,
+        date: new Date().toISOString().split('T')[0]
+      };
 
-      // A. Get category ID
-      let categoryId = null;
-      if (variables.category_name) {
-        const { data: cat } = await supabase
-          .from('categories')
-          .select('id')
-          .eq('name', variables.category_name)
-          .maybeSingle();
-
-        if (cat) {
-          categoryId = cat.id;
-        } else {
-          // Create category if it doesn't exist
-          const { data: newCat } = await supabase
-            .from('categories')
-            .insert({ tenant_id: profile.tenant_id, name: variables.category_name })
-            .select()
-            .single();
-          categoryId = newCat?.id || null;
-        }
-      }
-
-      // B. Insert product
-      const { data: product, error: pErr } = await supabase
-        .from('products')
-        .insert({
-          tenant_id: profile.tenant_id,
-          name: variables.name,
-          sku: variables.sku,
-          category_id: categoryId,
-          cost_price: variables.costPrice,
-          sale_price: variables.salePrice,
-          created_by: profile.id,
-        })
-        .select()
-        .single();
-
-      if (pErr) throw pErr;
-
-      // C. Seeding initial stock if stock > 0
-      if (variables.stock > 0 && product) {
-        // Find or create main location
-        let { data: loc } = await supabase
-          .from('locations')
-          .select('id')
-          .eq('is_main', true)
-          .maybeSingle();
-
-        if (!loc) {
-          const { data: newLoc } = await supabase
-            .from('locations')
-            .insert({ tenant_id: profile.tenant_id, name: 'Tienda Principal', is_main: true })
-            .select()
-            .single();
-          loc = newLoc;
-        }
-
-        if (loc) {
-          // Add to inventory
-          const { error: invErr } = await supabase
-            .from('inventory')
-            .insert({
-              tenant_id: profile.tenant_id,
-              product_id: product.id,
-              location_id: loc.id,
-              quantity: variables.stock,
-            });
-          if (invErr) console.error("Error setting stock:", invErr.message);
-
-          // Add movement record
-          await supabase.from('inventory_movements').insert({
-            tenant_id: profile.tenant_id,
-            product_id: product.id,
-            location_id: loc.id,
-            type: 'adjustment',
-            quantity: variables.stock,
-            unit_cost: variables.costPrice,
-            notes: 'Ajuste inicial de inventario',
-            created_by: profile.id,
-          });
-        }
-      }
-
-      return product;
+      newProds.unshift(newProd);
+      saveLocalNewProducts(newProds);
+      return newProd;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['products'] });
-    },
+      queryClient.invalidateQueries({ queryKey: ['categories'] });
+    }
   });
 
-  // 4. Update product mutation
+  // 4. Update Product
   const updateProduct = useMutation({
     mutationFn: async (variables: {
-      id: string;
+      id: string; // SKU
       name: string;
       sku: string;
       category_name: string;
@@ -215,109 +206,71 @@ export function useProductos() {
       salePrice: number;
       stock?: number;
     }) => {
-      if (!profile?.tenant_id) throw new Error('Not authenticated');
+      const newProds = getLocalNewProducts();
+      const isNew = newProds.some(p => p.sku === variables.id);
 
-      // A. Get category ID
-      let categoryId = null;
-      if (variables.category_name) {
-        const { data: cat } = await supabase
-          .from('categories')
-          .select('id')
-          .eq('name', variables.category_name)
-          .maybeSingle();
-
-        categoryId = cat?.id || null;
-      }
-
-      // B. Update product details
-      const { error: pErr } = await supabase
-        .from('products')
-        .update({
+      if (isNew) {
+        // Edit in new products list
+        const updated = newProds.map(p => {
+          if (p.sku === variables.id) {
+            return {
+              ...p,
+              name: variables.name,
+              sku: variables.sku,
+              category_id: variables.category_name.toLowerCase().replace(/\s+/g, '-'),
+              category_name: variables.category_name,
+              costPrice: Number(variables.costPrice || 0),
+              salePrice: Number(variables.salePrice || 0),
+              stock: variables.stock !== undefined ? Number(variables.stock) : p.stock,
+              brand: detectBrand(variables.name)
+            } as Product;
+          }
+          return p;
+        });
+        saveLocalNewProducts(updated);
+      } else {
+        // Save to modifications list
+        const mods = getLocalModifications();
+        mods[variables.id] = {
           name: variables.name,
           sku: variables.sku,
-          category_id: categoryId,
-          cost_price: variables.costPrice,
-          sale_price: variables.salePrice,
-          updated_by: profile.id,
-        })
-        .eq('id', variables.id);
-
-      if (pErr) throw pErr;
-
-      // C. Adjust inventory stock if changed
-      if (variables.stock !== undefined) {
-        let { data: loc } = await supabase
-          .from('locations')
-          .select('id')
-          .eq('is_main', true)
-          .maybeSingle();
-
-        if (!loc) {
-          const { data: newLoc } = await supabase
-            .from('locations')
-            .insert({ tenant_id: profile.tenant_id, name: 'Tienda Principal', is_main: true })
-            .select()
-            .single();
-          loc = newLoc;
+          category_id: variables.category_name.toLowerCase().replace(/\s+/g, '-'),
+          category_name: variables.category_name,
+          costPrice: Number(variables.costPrice || 0),
+          salePrice: Number(variables.salePrice || 0),
+          brand: detectBrand(variables.name)
+        };
+        if (variables.stock !== undefined) {
+          mods[variables.id].stock = Number(variables.stock);
         }
-
-        if (loc) {
-          // Check current stock
-          const { data: currInv } = await supabase
-            .from('inventory')
-            .select('quantity')
-            .eq('product_id', variables.id)
-            .eq('location_id', loc.id)
-            .maybeSingle();
-
-          const currentStock = currInv?.quantity || 0;
-          const diff = variables.stock - currentStock;
-
-          if (diff !== 0) {
-            // Upsert inventory
-            const { error: invErr } = await supabase
-              .from('inventory')
-              .upsert({
-                tenant_id: profile.tenant_id,
-                product_id: variables.id,
-                location_id: loc.id,
-                quantity: variables.stock,
-              }, { onConflict: 'product_id,location_id' });
-            if (invErr) console.error("Error setting stock:", invErr.message);
-
-            // Record movement
-            await supabase.from('inventory_movements').insert({
-              tenant_id: profile.tenant_id,
-              product_id: variables.id,
-              location_id: loc.id,
-              type: 'adjustment',
-              quantity: diff,
-              unit_cost: variables.costPrice,
-              notes: 'Modificación manual de stock',
-              created_by: profile.id,
-            });
-          }
-        }
+        saveLocalModifications(mods);
       }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['products'] });
-    },
+    }
   });
 
-  // 5. Delete product mutation
+  // 5. Delete Product
   const deleteProduct = useMutation({
-    mutationFn: async (id: string) => {
-      // Soft-delete by setting active=false
-      const { error } = await supabase
-        .from('products')
-        .update({ active: false })
-        .eq('id', id);
-      if (error) throw error;
+    mutationFn: async (sku: string) => {
+      const newProds = getLocalNewProducts();
+      const isNew = newProds.some(p => p.sku === sku);
+
+      if (isNew) {
+        // Remove from new products
+        const filtered = newProds.filter(p => p.sku !== sku);
+        saveLocalNewProducts(filtered);
+      } else {
+        // Set deleted = true in modifications
+        const mods = getLocalModifications();
+        mods[sku] = { ...mods[sku], deleted: true };
+        saveLocalModifications(mods);
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['products'] });
-    },
+    }
   });
 
   return {
@@ -328,6 +281,6 @@ export function useProductos() {
     error: productsQuery.error || categoriesQuery.error,
     createProduct,
     updateProduct,
-    deleteProduct,
+    deleteProduct
   };
 }
