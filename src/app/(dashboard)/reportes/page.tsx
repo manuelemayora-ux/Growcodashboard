@@ -39,33 +39,48 @@ export default function ReportesPage() {
         <button className="btn-dark text-sm"><Download className="h-4 w-4"/>Exportar</button>
       </div>
 
-      {/* KPIs */}
-      <div className="mb-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <div className="bento-cyan relative overflow-hidden">
+      <div className="mb-6 grid grid-cols-4 gap-2 sm:gap-4">
+        <div className="bento-cyan relative overflow-hidden !p-3 sm:!p-6 rounded-xl sm:rounded-[24px]">
           <div className="absolute -right-6 -top-6 w-20 h-20 bg-white/20 blur-2xl rounded-full"></div>
           <div className="relative z-10">
-            <div className="stat-label text-white/80">Valor Total Inventario</div>
-            <div className="stat-value font-mono-price text-white mt-2">
-              ${stats.inventoryValue.toLocaleString("en-US", { minimumFractionDigits: 2 })}
+            <div className="stat-label !text-[8px] xs:!text-[9px] sm:!text-xs leading-tight text-white/80 truncate">
+              <span className="hidden xs:inline">Valor Total Inventario</span>
+              <span className="inline xs:hidden">Valor Inv.</span>
+            </div>
+            <div className="stat-value font-mono-price text-white !text-xs xs:!text-sm sm:!text-2xl lg:!text-3xl mt-2">
+              <span className="hidden xs:inline">${stats.inventoryValue.toLocaleString("en-US", { maximumFractionDigits: 0 })}</span>
+              <span className="inline xs:hidden">${(stats.inventoryValue >= 1000000) ? (stats.inventoryValue / 1000000).toFixed(1).replace(/\.0$/, '') + 'M' : (stats.inventoryValue / 1000).toFixed(0) + 'k'}</span>
             </div>
           </div>
         </div>
-        <div className="bento-card">
-          <div className="stat-label">Valor de Venta</div>
-          <div className="stat-value font-mono-price text-[rgb(var(--bg-dark))] mt-2">
-            ${stats.retailValue.toLocaleString("en-US", { minimumFractionDigits: 2 })}
+        <div className="bento-card !p-3 sm:!p-6 rounded-xl sm:rounded-[24px]">
+          <div className="stat-label !text-[8px] xs:!text-[9px] sm:!text-xs leading-tight truncate">
+            <span className="hidden xs:inline">Valor de Venta</span>
+            <span className="inline xs:hidden">Valor Vta.</span>
+          </div>
+          <div className="stat-value font-mono-price text-[rgb(var(--bg-dark))] !text-xs xs:!text-sm sm:!text-2xl lg:!text-3xl mt-2">
+            <span className="hidden xs:inline">${stats.retailValue.toLocaleString("en-US", { maximumFractionDigits: 0 })}</span>
+            <span className="inline xs:hidden">${(stats.retailValue >= 1000000) ? (stats.retailValue / 1000000).toFixed(1).replace(/\.0$/, '') + 'M' : (stats.retailValue / 1000).toFixed(0) + 'k'}</span>
           </div>
         </div>
-        <div className="bento-card">
-          <div className="stat-label">Precio Promedio</div>
-          <div className="stat-value font-mono-price text-[rgb(var(--bg-dark))] mt-2">
-            ${avgPrice.toFixed(2)}
+        <div className="bento-card !p-3 sm:!p-6 rounded-xl sm:rounded-[24px]">
+          <div className="stat-label !text-[8px] xs:!text-[9px] sm:!text-xs leading-tight truncate">
+            <span className="hidden xs:inline">Precio Promedio</span>
+            <span className="inline xs:hidden">P. Prom.</span>
+          </div>
+          <div className="stat-value font-mono-price text-[rgb(var(--bg-dark))] !text-xs xs:!text-sm sm:!text-2xl lg:!text-3xl mt-2">
+            <span className="hidden xs:inline">${avgPrice.toFixed(2)}</span>
+            <span className="inline xs:hidden">${avgPrice.toFixed(0)}</span>
           </div>
         </div>
-        <div className="bento-accent">
-          <div className="stat-label text-[rgb(var(--text-on-accent))]/70">Margen Promedio</div>
-          <div className="stat-value font-mono-price text-[rgb(var(--text-on-accent))] mt-2">
-            {avgMargin.toFixed(1)}%
+        <div className="bento-accent !p-3 sm:!p-6 rounded-xl sm:rounded-[24px]">
+          <div className="stat-label !text-[8px] xs:!text-[9px] sm:!text-xs leading-tight text-[rgb(var(--text-on-accent))]/70 truncate">
+            <span className="hidden xs:inline">Margen Promedio</span>
+            <span className="inline xs:hidden">Margen</span>
+          </div>
+          <div className="stat-value font-mono-price text-[rgb(var(--text-on-accent))] !text-xs xs:!text-sm sm:!text-2xl lg:!text-3xl mt-2">
+            <span className="hidden xs:inline">{avgMargin.toFixed(1)}%</span>
+            <span className="inline xs:hidden">{avgMargin.toFixed(0)}%</span>
           </div>
         </div>
       </div>
