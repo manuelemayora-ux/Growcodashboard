@@ -36,14 +36,14 @@ export default function LandingPage() {
       {/* ---- HERO ---- */}
       <section className="px-6 pb-24 pt-20 md:pt-32 relative z-10">
         <div className="mx-auto max-w-7xl">
-          <div className="grid lg:grid-cols-[1fr_2fr] gap-8 lg:gap-12 items-center">
+          <div className="grid lg:grid-cols-[1.2fr_0.8fr] gap-8 lg:gap-12 items-center">
             <div className="relative z-20">
               <div className="mb-8 inline-flex items-center gap-3 rounded-full px-5 py-2 text-sm font-bold glass-cyan text-[rgb(var(--bg-dark))] shadow-lg border border-[rgba(0,209,255,0.3)]">
                 <span className="flex h-2.5 w-2.5 rounded-full animate-pulse" style={{ background: 'rgb(var(--accent))' }} />
                 Implementación e integración llave en mano
               </div>
 
-              <h1 className="text-5xl font-black leading-[1.1] tracking-tight md:text-[80px] text-[rgb(var(--bg-dark))] drop-shadow-sm">
+              <h1 className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-black leading-[1.1] tracking-tight text-[rgb(var(--bg-dark))] drop-shadow-sm">
                 Controla tu stock
                 <br />
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-[rgb(var(--blue-deep))] to-[rgb(var(--cyan-bright))]">
@@ -51,7 +51,7 @@ export default function LandingPage() {
                 </span>
               </h1>
 
-              <p className="mt-8 max-w-xl text-xl leading-relaxed font-medium" style={{ color: 'rgb(var(--text-secondary))' }}>
+              <p className="mt-8 max-w-xl text-lg sm:text-xl leading-relaxed font-medium" style={{ color: 'rgb(var(--text-secondary))' }}>
                 Desplegamos un sistema completo de inventario y facturación adaptado a tu empresa. Con la tecnología de <strong className="text-[rgb(var(--bg-dark))]">Growco</strong>, 
                 obtén flujos de trabajo optimizados y paneles analíticos en tiempo real para tu negocio.
               </p>
@@ -68,9 +68,9 @@ export default function LandingPage() {
             </div>
             
             {/* HERO IMAGE - MASSIVE 3D GLASS G */}
-            <div className="relative flex justify-center lg:justify-end animate-fade-up animate-float w-full">
-              <div className="absolute inset-0 bg-gradient-to-tr from-[rgb(var(--cyan))] via-[rgb(var(--blue-deep))] to-[rgb(var(--cyan-bright))] opacity-50 blur-[160px] rounded-full transform scale-150"></div>
-              <Image src="/12.png" alt="Growco Logo" width={1800} height={1800} className="w-full max-w-[1200px] lg:max-w-[1600px] h-auto object-contain relative z-20 drop-shadow-[0_60px_110px_rgba(0,51,255,0.45)] transform scale-110 lg:scale-130 hover:scale-135 transition-transform duration-700 ease-out" priority />
+            <div className="relative flex justify-center lg:justify-end animate-fade-up animate-float w-full min-w-0">
+              <div className="absolute inset-0 bg-gradient-to-tr from-[rgb(var(--cyan))] via-[rgb(var(--blue-deep))] to-[rgb(var(--cyan-bright))] opacity-25 blur-[100px] rounded-full"></div>
+              <Image src="/12.png" alt="Growco Logo" width={800} height={800} className="w-full max-w-[450px] sm:max-w-[550px] lg:max-w-[650px] h-auto object-contain relative z-20 drop-shadow-[0_40px_80px_rgba(0,51,255,0.3)] hover:scale-105 transition-transform duration-500 ease-out" priority />
             </div>
           </div>
         </div>
