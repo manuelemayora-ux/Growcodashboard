@@ -1,7 +1,8 @@
 "use client";
 
 import { useDashboard } from "@/hooks/useDashboard";
-import { Package, TrendingUp, AlertTriangle, DollarSign, ArrowUpRight } from "lucide-react";
+import { Package, TrendingUp, AlertTriangle, DollarSign, ArrowUpRight, ShoppingCart } from "lucide-react";
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Cell } from "recharts";
 
 export default function DashboardPage() {
   const { stats, isLoading } = useDashboard();
@@ -167,7 +168,67 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* Bento Grid — Row 3: Top Productos */}
+      {/* Bento Grid — Row 3: Proyecciones & Reabastecimiento */}
+      <div className="grid gap-4 lg:grid-cols-[2fr_1fr] mt-4">
+        {/* Proyección Inventario (Meses) */}
+        <div className="bento-card">
+          <div className="mb-6 flex items-center justify-between">
+            <h2 className="text-base font-bold text-[rgb(var(--bg-dark))]">Proyección de Inventario (Meses)</h2>
+            <span className="badge-pill badge-cyan">Por Categoría</span>
+          </div>
+          <div className="h-[250px] w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={stats.projectionsByCategory} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(0,0,0,0.05)" />
+                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: 'rgb(var(--text-secondary))' }} />
+                <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: 'rgb(var(--text-secondary))' }} />
+                <Tooltip 
+                  cursor={{ fill: 'rgba(0,0,0,0.02)' }}
+                  contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 30px rgba(0,0,0,0.1)' }}
+                />
+                <Bar dataKey="monthsOfInventory" name="Meses de Stock" radius={[4, 4, 0, 0]}>
+                  {stats.projectionsByCategory.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.monthsOfInventory <= 3 ? 'rgb(var(--amber-main))' : 'rgb(var(--cyan))'} />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+
+        {/* Alertas de Reorden */}
+        <div className="bento-card border-[rgb(var(--amber-main))] border overflow-hidden relative">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-[rgb(var(--amber-main))] opacity-10 blur-2xl rounded-full"></div>
+          <div className="mb-5 flex items-center gap-2 relative z-10">
+            <ShoppingCart className="h-5 w-5 text-[rgb(var(--amber-main))]" />
+            <h2 className="text-base font-bold text-[rgb(var(--bg-dark))]">Órdenes de Compra Sugeridas</h2>
+          </div>
+          <p className="text-xs font-medium text-[rgb(var(--text-secondary))] mb-4 relative z-10">
+            Categorías que requerirán reabastecimiento pronto (Lead time: 2 meses).
+          </p>
+          <div className="space-y-3 relative z-10 max-h-[200px] overflow-y-auto pr-2">
+            {stats.reorderAlerts.length === 0 ? (
+              <p className="py-6 text-center text-sm font-medium text-[rgb(var(--text-dim))]">Sin alertas de reorden por ahora.</p>
+            ) : (
+              stats.reorderAlerts.map((alert) => (
+                <div key={alert.name} className="flex items-center justify-between p-3 rounded-xl bg-[rgb(var(--bg-input))]">
+                  <div className="min-w-0 flex-1">
+                    <div className="truncate text-sm font-bold text-[rgb(var(--bg-dark))]">{alert.name}</div>
+                    <div className="text-xs font-medium text-[rgb(var(--text-secondary))] mt-0.5">Velocidad: {alert.monthlyVelocity} / mes</div>
+                  </div>
+                  <div className="text-right">
+                    <span className={`badge-pill ${alert.monthsOfInventory <= 1 ? "badge-red" : "badge-amber"}`}>
+                      {alert.monthsOfInventory} meses
+                    </span>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Bento Grid — Row 4: Top Productos */}
       <div className="mt-4 bento-card">
         <div className="mb-5 flex items-center justify-between">
           <h2 className="text-base font-bold text-[rgb(var(--bg-dark))]">Top Productos por Precio</h2>
