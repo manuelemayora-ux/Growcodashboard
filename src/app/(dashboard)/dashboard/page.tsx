@@ -1,11 +1,95 @@
 "use client";
 
+import { useState, useMemo } from "react";
 import { useDashboard } from "@/hooks/useDashboard";
-import { Package, TrendingUp, AlertTriangle, DollarSign, ArrowUpRight, ShoppingCart, Clock } from "lucide-react";
+import { useInventario } from "@/hooks/useInventario";
+import { useProductos } from "@/hooks/useProductos";
+import { Package, TrendingUp, AlertTriangle, DollarSign, ArrowUpRight, ShoppingCart, Clock, Star } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Cell } from "recharts";
 
 export default function DashboardPage() {
-  const { stats, isLoading } = useDashboard();
+  const { stats, isLoading: dashboardLoading } = useDashboard();
+  const { movements, isLoading: movementsLoading } = useInventario();
+  const { products } = useProductos();
+
+  // Find unique months in movements
+  const availableMonths = useMemo(() => {
+    if (!movements) return [];
+    const monthsSet = new Set<string>();
+    movements.forEach(m => {
+      if (m.type === 'salida' && m.date) {
+        monthsSet.add(m.date.slice(0, 7)); // "YYYY-MM"
+      }
+    });
+    return Array.from(monthsSet).sort((a, b) => b.localeCompare(a));
+  }, [movements]);
+
+  // Set default selectedMonth to the most recent month if available, else 'todos'
+  const [selectedMonth, setSelectedMonth] = useState<string>("todos");
+
+  // Helper to translate YYYY-MM to Spanish Month Name
+  const formatMonthName = (monthStr: string) => {
+    if (monthStr === "todos") return "Todos";
+    const [year, month] = monthStr.split('-');
+    const monthsNames = [
+      'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+      'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
+    ];
+    const monthIdx = parseInt(month, 10) - 1;
+    return `${monthsNames[monthIdx]} ${year}`;
+  };
+
+  // Filter movements by selectedMonth
+  const filteredMovements = useMemo(() => {
+    if (!movements) return [];
+    if (selectedMonth === 'todos') {
+      return movements.filter(m => m.type === 'salida');
+    }
+    return movements.filter(m => m.type === 'salida' && m.date.startsWith(selectedMonth));
+  }, [movements, selectedMonth]);
+
+  // Calculate best sellers per category
+  const bestSellersByCategory = useMemo(() => {
+    if (!products || products.length === 0) return [];
+
+    // 1. Group sales by SKU for the filtered period
+    const salesBySku: Record<string, number> = {};
+    filteredMovements.forEach(m => {
+      salesBySku[m.sku] = (salesBySku[m.sku] || 0) + m.qty;
+    });
+
+    // 2. Group products by category
+    const categoryProducts: Record<string, { sku: string; name: string; sales: number }[]> = {};
+    products.forEach(p => {
+      const cat = p.category_name || 'General';
+      if (!categoryProducts[cat]) {
+        categoryProducts[cat] = [];
+      }
+      const sales = salesBySku[p.sku] || 0;
+      categoryProducts[cat].push({ sku: p.sku, name: p.name, sales });
+    });
+
+    // 3. Find top 3 products per category with sales > 0, sorted by sales desc
+    return Object.entries(categoryProducts).map(([categoryName, prods]) => {
+      const topProds = prods
+        .filter(p => p.sales > 0)
+        .sort((a, b) => b.sales - a.sales)
+        .slice(0, 3);
+
+      return {
+        categoryName,
+        products: topProds
+      };
+    })
+    .filter(cat => cat.products.length > 0)
+    .sort((a, b) => {
+      const aMax = a.products[0]?.sales || 0;
+      const bMax = b.products[0]?.sales || 0;
+      return bMax - aMax;
+    });
+  }, [products, filteredMovements]);
+
+  const isLoading = dashboardLoading || movementsLoading;
 
   if (isLoading) {
     return (
@@ -174,6 +258,89 @@ export default function DashboardPage() {
               ))
             )}
           </div>
+        </div>
+      </div>
+
+      {/* Best Sellers Section — Full Width */}
+      <div className="bento-card mt-4">
+        <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <div className="flex items-center gap-2">
+              <Star className="h-5 w-5 text-[rgb(var(--cyan))]" />
+              <h2 className="text-base font-bold text-[rgb(var(--bg-dark))]">Productos Estrella (Best Sellers)</h2>
+            </div>
+            <p className="text-xs font-medium text-[rgb(var(--text-secondary))] mt-1">
+              Top 3 productos más vendidos por categoría en el período seleccionado.
+            </p>
+          </div>
+          {/* Segmented control for months filtering */}
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              onClick={() => setSelectedMonth("todos")}
+              className={`pill-tab ${selectedMonth === "todos" ? "active" : ""}`}
+            >
+              Todos
+            </button>
+            {availableMonths.map((mStr) => (
+              <button
+                key={mStr}
+                onClick={() => setSelectedMonth(mStr)}
+                className={`pill-tab ${selectedMonth === mStr ? "active" : ""}`}
+              >
+                {formatMonthName(mStr)}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Table representation */}
+        <div className="overflow-x-auto">
+          <table className="w-full text-left border-collapse">
+            <thead>
+              <tr className="border-b border-[rgb(var(--border))]">
+                <th className="py-3.5 px-4 text-xs font-bold uppercase tracking-wider text-[rgb(var(--text-secondary))] w-1/4">Categoría</th>
+                <th className="py-3.5 px-4 text-xs font-bold uppercase tracking-wider text-[rgb(var(--text-secondary))] w-1/4">Top 1</th>
+                <th className="py-3.5 px-4 text-xs font-bold uppercase tracking-wider text-[rgb(var(--text-secondary))] w-1/4">Top 2</th>
+                <th className="py-3.5 px-4 text-xs font-bold uppercase tracking-wider text-[rgb(var(--text-secondary))] w-1/4">Top 3</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-[rgb(var(--border))]">
+              {bestSellersByCategory.length === 0 ? (
+                <tr>
+                  <td colSpan={4} className="py-10 text-center text-sm font-semibold text-[rgb(var(--text-dim))]">
+                    No se registran ventas para el período seleccionado.
+                  </td>
+                </tr>
+              ) : (
+                bestSellersByCategory.map((row) => (
+                  <tr key={row.categoryName} className="hover:bg-[rgb(var(--bg-input))]/30 transition-colors">
+                    <td className="py-4 px-4 align-middle">
+                      <span className="text-sm font-bold text-[rgb(var(--bg-dark))]">{row.categoryName}</span>
+                    </td>
+                    {[0, 1, 2].map((idx) => {
+                      const p = row.products[idx];
+                      return (
+                        <td key={idx} className="py-4 px-4 align-middle">
+                          {p ? (
+                            <div className="flex flex-col">
+                              <span className="text-sm font-semibold text-[rgb(var(--bg-dark))] truncate max-w-[200px]" title={p.name}>
+                                {p.name}
+                              </span>
+                              <span className="text-xs font-bold mt-1 text-[rgb(var(--cyan-bright))] bg-[rgb(var(--bg-input))] px-2 py-0.5 rounded-full w-fit">
+                                {p.sales.toLocaleString()} uds
+                              </span>
+                            </div>
+                          ) : (
+                            <span className="text-xs font-semibold text-[rgb(var(--text-dim))]">-</span>
+                          )}
+                        </td>
+                      );
+                    })}
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
         </div>
       </div>
 
