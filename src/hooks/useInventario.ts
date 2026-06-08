@@ -13,7 +13,7 @@ export interface Movement {
   note: string;
 }
 
-const STORAGE_MOVEMENTS_KEY = 'stockly_movements_v6';
+const STORAGE_MOVEMENTS_KEY = 'stockly_movements_v7';
 
 function getLocalMovements(): Movement[] {
   if (typeof window === 'undefined') return [];
@@ -51,16 +51,16 @@ export function useInventario() {
         let isEarliestSetted = false;
 
         const targetMonthsByCategory: Record<string, number> = {
-          'Lectura': 1.5,
-          'Ciclismo': 2.5,
-          'Goggles': 3.5,
-          'Seguridad': 4.8,
-          'Clip-On': 6.2,
-          'Blue Light': 8.0,
-          'Sport': 2.0,
-          'Solar': 10.5,
-          'Natación': 1.8,
-          'Oftálmico': 12.0
+          'Solar': 1.5,
+          'Oftálmico': 1.8,
+          'Sport': 2.2,
+          'Natación': 3.5,
+          'Lectura': 5.0,
+          'Ciclismo': 6.5,
+          'Goggles': 8.0,
+          'Seguridad': 10.0,
+          'Clip-On': 12.0,
+          'Blue Light': 12.0
         };
 
         const getTargetMonths = (categoryName: string | undefined): number => {
@@ -81,7 +81,9 @@ export function useInventario() {
           let totalQtySold = 0;
           if (!isObsolete && p.stock > 0) {
             const T = getTargetMonths(p.category_name);
-            totalQtySold = Math.round((p.stock / T) * 3);
+            // Scale stock by 25 to generate a realistic, smaller sales quantity
+            const scaledStock = p.stock / 25;
+            totalQtySold = Math.round((scaledStock / T) * 3);
             if (totalQtySold === 0) totalQtySold = 1;
           }
 

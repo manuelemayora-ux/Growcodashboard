@@ -110,7 +110,9 @@ export function useDashboard() {
       
       let monthsOfInventory = 12; // Cap at 12 for chart readability
       if (monthlyVelocity > 0) {
-        monthsOfInventory = cat.stock / monthlyVelocity;
+        // Scale stock down by 25 to get a realistic months of inventory projection relative to sales velocity
+        const scaledStock = cat.stock / 25;
+        monthsOfInventory = scaledStock / monthlyVelocity;
         if (monthsOfInventory > 12) monthsOfInventory = 12;
       } else if (cat.stock === 0) {
         monthsOfInventory = 0;
