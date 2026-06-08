@@ -13,7 +13,7 @@ export interface Movement {
   note: string;
 }
 
-const STORAGE_MOVEMENTS_KEY = 'stockly_movements_v4';
+const STORAGE_MOVEMENTS_KEY = 'stockly_movements_v5';
 
 function getLocalMovements(): Movement[] {
   if (typeof window === 'undefined') return [];
@@ -39,8 +39,9 @@ export function useInventario() {
     queryKey: ['movements'],
     queryFn: async () => {
       const localMovs = getLocalMovements();
+      const hasSeed = localMovs.some(m => m.id.startsWith('seed-'));
 
-      if (localMovs.length === 0 && products.length > 0) {
+      if (!hasSeed && products.length > 0) {
         const seeded: Movement[] = [];
         const now = new Date();
         let isEarliestSetted = false;
@@ -128,9 +129,10 @@ export function useInventario() {
           }
         });
         
-        seeded.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-        saveLocalMovements(seeded);
-        return seeded;
+        const combined = [...localMovs, ...seeded];
+        combined.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+        saveLocalMovements(combined);
+        return combined;
       }
 
       return localMovs;
