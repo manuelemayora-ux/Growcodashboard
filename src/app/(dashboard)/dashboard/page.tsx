@@ -1,7 +1,7 @@
 "use client";
 
 import { useDashboard } from "@/hooks/useDashboard";
-import { Package, TrendingUp, AlertTriangle, DollarSign, ArrowUpRight, ShoppingCart } from "lucide-react";
+import { Package, TrendingUp, AlertTriangle, DollarSign, ArrowUpRight, ShoppingCart, Clock } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Cell } from "recharts";
 
 export default function DashboardPage() {
@@ -33,8 +33,8 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* Bento Grid — Row 1: 4 stat cards */}
-      <div className="mb-4 grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+      {/* Bento Grid — Row 1: 5 stat cards */}
+      <div className="mb-4 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4">
         {/* Total Productos — Dark block */}
         <div className="bento-dark flex flex-col justify-between hover:shadow-lg transition-all p-4 sm:p-6 rounded-2xl sm:rounded-[24px]">
           <div className="flex items-center justify-between">
@@ -45,7 +45,7 @@ export default function DashboardPage() {
           </div>
           <div className="mt-4">
             <div className="stat-value text-white text-xl sm:text-2xl lg:text-3xl">{stats.totalProducts}</div>
-            <div className="mt-1 text-xs font-medium text-white/50 truncate">{stats.totalStock.toLocaleString()} unidades</div>
+            <div className="mt-1 text-xs font-medium text-white/50 truncate">{stats.totalStock.toLocaleString()} uds</div>
           </div>
         </div>
 
@@ -82,6 +82,22 @@ export default function DashboardPage() {
           </div>
         </div>
 
+        {/* Obsolescencia — White block with Purple/Gray */}
+        <div className="bento-card flex flex-col justify-between hover:shadow-md transition-all p-4 sm:p-6 rounded-2xl sm:rounded-[24px]">
+          <div className="flex items-center justify-between">
+            <span className="stat-label text-[rgb(var(--text-secondary))]">Obsolescencia</span>
+            <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-[rgb(var(--bg-input))]">
+              <Clock className="h-4 w-4 text-[rgb(var(--text-secondary))]" />
+            </div>
+          </div>
+          <div className="mt-4">
+            <div className="stat-value text-[rgb(var(--bg-dark))] text-xl sm:text-2xl lg:text-3xl">{stats.obsoleteCount}</div>
+            <div className="mt-1 flex items-center gap-1 text-xs font-medium text-[rgb(var(--text-dim))] truncate">
+              Sin ventas {'>'} 90 días
+            </div>
+          </div>
+        </div>
+
         {/* Alertas — Muted */}
         <div className="bento-muted flex flex-col justify-between hover:shadow-md transition-all p-4 sm:p-6 rounded-2xl sm:rounded-[24px]">
           <div className="flex items-center justify-between">
@@ -93,7 +109,7 @@ export default function DashboardPage() {
           <div className="mt-4 flex items-baseline gap-4">
             <div>
               <span className="stat-value text-[rgb(var(--red-main))] text-xl sm:text-2xl lg:text-3xl">{stats.outOfStock}</span>
-              <span className="ml-1 text-xs font-medium text-[rgb(var(--text-secondary))]">agotados</span>
+              <span className="ml-1 text-xs font-medium text-[rgb(var(--text-secondary))]">agots.</span>
             </div>
             <div>
               <span className="stat-value text-[rgb(var(--amber-main))] text-xl sm:text-2xl lg:text-3xl">{stats.lowStock}</span>
@@ -103,15 +119,73 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* Bento Grid — Row 2: Categories + Low Stock */}
+      {/* Bento Grid — Row 2: Proyecciones & Reabastecimiento */}
       <div className="grid gap-4 lg:grid-cols-[2fr_1fr]">
+        {/* Proyección Inventario (Meses) */}
+        <div className="bento-card">
+          <div className="mb-6 flex items-center justify-between">
+            <h2 className="text-base font-bold text-[rgb(var(--bg-dark))]">Proyección de Inventario (Meses)</h2>
+            <span className="badge-pill badge-cyan">Por Categoría</span>
+          </div>
+          <div className="h-[250px] w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={stats.projectionsByCategory} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(0,0,0,0.05)" />
+                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: 'rgb(var(--text-secondary))' }} />
+                <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: 'rgb(var(--text-secondary))' }} />
+                <Tooltip 
+                  cursor={{ fill: 'rgba(0,0,0,0.02)' }}
+                  contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 30px rgba(0,0,0,0.1)' }}
+                />
+                <Bar dataKey="monthsOfInventory" name="Meses de Stock" radius={[4, 4, 0, 0]}>
+                  {stats.projectionsByCategory.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.monthsOfInventory <= 3 ? 'rgb(var(--amber-main))' : 'rgb(var(--cyan))'} />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+
+        {/* Alertas de Reorden */}
+        <div className="bento-card border-[rgb(var(--amber-main))] border overflow-hidden relative">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-[rgb(var(--amber-main))] opacity-10 blur-2xl rounded-full"></div>
+          <div className="mb-5 flex items-center gap-2 relative z-10">
+            <ShoppingCart className="h-5 w-5 text-[rgb(var(--amber-main))]" />
+            <h2 className="text-base font-bold text-[rgb(var(--bg-dark))]">Órdenes Sugeridas</h2>
+          </div>
+          <p className="text-xs font-medium text-[rgb(var(--text-secondary))] mb-4 relative z-10">
+            Volumen para 3 meses (Lead time + stock seguro).
+          </p>
+          <div className="space-y-3 relative z-10 max-h-[200px] overflow-y-auto pr-2 custom-scrollbar">
+            {stats.reorderAlerts.length === 0 ? (
+              <p className="py-6 text-center text-sm font-medium text-[rgb(var(--text-dim))]">Sin alertas de reorden por ahora.</p>
+            ) : (
+              stats.reorderAlerts.map((alert) => (
+                <div key={alert.name} className="flex items-center justify-between p-3 rounded-xl bg-[rgb(var(--bg-input))]">
+                  <div className="min-w-0 flex-1 pr-2">
+                    <div className="truncate text-sm font-bold text-[rgb(var(--bg-dark))]">{alert.name}</div>
+                    <div className="text-xs font-medium text-[rgb(var(--text-secondary))] mt-0.5">Dura: {alert.monthsOfInventory} meses</div>
+                  </div>
+                  <div className="text-right whitespace-nowrap">
+                    <div className="text-sm font-black text-[rgb(var(--bg-dark))]">Comprar: {alert.suggestedOrderQty}</div>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Bento Grid — Row 3: Categories + Low Stock */}
+      <div className="grid gap-4 lg:grid-cols-[2fr_1fr] mt-4">
         {/* Categorías — White card */}
         <div className="bento-card">
           <div className="mb-6 flex items-center justify-between">
             <h2 className="text-base font-bold text-[rgb(var(--bg-dark))]">Productos por Categoría</h2>
             <span className="badge-pill badge-dark">{stats.byCategory.length} categorías</span>
           </div>
-          <div className="space-y-4">
+          <div className="space-y-4 max-h-[250px] overflow-y-auto pr-2 custom-scrollbar">
             {stats.byCategory.length === 0 ? (
               <div className="text-center py-10 text-sm font-semibold" style={{color:'rgb(var(--text-dim))'}}>
                 Aún no hay categorías con stock registrado
@@ -147,7 +221,7 @@ export default function DashboardPage() {
               <div className="w-2 h-2 rounded-full bg-[rgb(var(--accent))] animate-pulse"></div>
               <h2 className="text-base font-bold text-white">Stock Crítico</h2>
             </div>
-            <div className="space-y-3">
+            <div className="space-y-3 max-h-[250px] overflow-y-auto pr-2 custom-scrollbar">
               {stats.lowStockProducts.length === 0 ? (
                 <p className="py-8 text-center text-sm font-medium text-white/50">✅ Inventario saludable</p>
               ) : (
@@ -164,66 +238,6 @@ export default function DashboardPage() {
                 ))
               )}
             </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Bento Grid — Row 3: Proyecciones & Reabastecimiento */}
-      <div className="grid gap-4 lg:grid-cols-[2fr_1fr] mt-4">
-        {/* Proyección Inventario (Meses) */}
-        <div className="bento-card">
-          <div className="mb-6 flex items-center justify-between">
-            <h2 className="text-base font-bold text-[rgb(var(--bg-dark))]">Proyección de Inventario (Meses)</h2>
-            <span className="badge-pill badge-cyan">Por Categoría</span>
-          </div>
-          <div className="h-[250px] w-full">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={stats.projectionsByCategory} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(0,0,0,0.05)" />
-                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: 'rgb(var(--text-secondary))' }} />
-                <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: 'rgb(var(--text-secondary))' }} />
-                <Tooltip 
-                  cursor={{ fill: 'rgba(0,0,0,0.02)' }}
-                  contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 30px rgba(0,0,0,0.1)' }}
-                />
-                <Bar dataKey="monthsOfInventory" name="Meses de Stock" radius={[4, 4, 0, 0]}>
-                  {stats.projectionsByCategory.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.monthsOfInventory <= 3 ? 'rgb(var(--amber-main))' : 'rgb(var(--cyan))'} />
-                  ))}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-
-        {/* Alertas de Reorden */}
-        <div className="bento-card border-[rgb(var(--amber-main))] border overflow-hidden relative">
-          <div className="absolute top-0 right-0 w-32 h-32 bg-[rgb(var(--amber-main))] opacity-10 blur-2xl rounded-full"></div>
-          <div className="mb-5 flex items-center gap-2 relative z-10">
-            <ShoppingCart className="h-5 w-5 text-[rgb(var(--amber-main))]" />
-            <h2 className="text-base font-bold text-[rgb(var(--bg-dark))]">Órdenes de Compra Sugeridas</h2>
-          </div>
-          <p className="text-xs font-medium text-[rgb(var(--text-secondary))] mb-4 relative z-10">
-            Categorías que requerirán reabastecimiento pronto (Lead time: 2 meses).
-          </p>
-          <div className="space-y-3 relative z-10 max-h-[200px] overflow-y-auto pr-2">
-            {stats.reorderAlerts.length === 0 ? (
-              <p className="py-6 text-center text-sm font-medium text-[rgb(var(--text-dim))]">Sin alertas de reorden por ahora.</p>
-            ) : (
-              stats.reorderAlerts.map((alert) => (
-                <div key={alert.name} className="flex items-center justify-between p-3 rounded-xl bg-[rgb(var(--bg-input))]">
-                  <div className="min-w-0 flex-1">
-                    <div className="truncate text-sm font-bold text-[rgb(var(--bg-dark))]">{alert.name}</div>
-                    <div className="text-xs font-medium text-[rgb(var(--text-secondary))] mt-0.5">Velocidad: {alert.monthlyVelocity} / mes</div>
-                  </div>
-                  <div className="text-right">
-                    <span className={`badge-pill ${alert.monthsOfInventory <= 1 ? "badge-red" : "badge-amber"}`}>
-                      {alert.monthsOfInventory} meses
-                    </span>
-                  </div>
-                </div>
-              ))
-            )}
           </div>
         </div>
       </div>

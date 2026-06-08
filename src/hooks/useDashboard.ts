@@ -18,6 +18,7 @@ export function useDashboard() {
         potentialProfit: 0,
         outOfStock: 0,
         lowStock: 0,
+        obsoleteCount: 0,
         byCategory: [],
         topExpensive: [],
         lowStockProducts: [],
@@ -58,24 +59,44 @@ export function useDashboard() {
       .sort((a, b) => a.stock - b.stock)
       .slice(0, 5);
 
-    // ---- Projections & Reorder logic ----
+    // ---- Projections, Reorder, & Obsolescence logic ----
     const categorySales: Record<string, number> = {};
     let earliestDate = new Date();
+    
+    // For obsolescence
+    let obsoleteCount = 0;
+    const ninetyDaysAgo = new Date();
+    ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90);
+    const lastSaleDates: Record<string, Date> = {};
 
     if (movements && movements.length > 0) {
       movements.forEach(m => {
         if (m.type === 'salida') {
           const prod = products.find(p => p.sku === m.sku);
-          const cat = prod?.category_name || 'General';
-          categorySales[cat] = (categorySales[cat] || 0) + m.qty;
+          if (prod) {
+            const cat = prod.category_name || 'General';
+            categorySales[cat] = (categorySales[cat] || 0) + m.qty;
+          }
           
           const mDate = new Date(m.date);
-          if (mDate < earliestDate) {
-            earliestDate = mDate;
+          if (mDate < earliestDate) earliestDate = mDate;
+          
+          // Track last sale date per SKU for obsolescence
+          if (!lastSaleDates[m.sku] || mDate > lastSaleDates[m.sku]) {
+            lastSaleDates[m.sku] = mDate;
           }
         }
       });
     }
+
+    products.forEach(p => {
+      if (p.stock > 0) {
+        const lastSale = lastSaleDates[p.sku];
+        if (!lastSale || lastSale < ninetyDaysAgo) {
+          obsoleteCount++;
+        }
+      }
+    });
 
     const today = new Date();
     const diffTime = Math.abs(today.getTime() - earliestDate.getTime());
@@ -95,16 +116,18 @@ export function useDashboard() {
         monthsOfInventory = 0;
       }
 
+      const suggestedOrderQty = Math.ceil(monthlyVelocity * 3); // 3 months volume
+
       return {
         name: cat.name,
         stock: cat.stock,
         monthlyVelocity: Math.round(monthlyVelocity * 10) / 10,
         monthsOfInventory: Math.round(monthsOfInventory * 10) / 10,
+        suggestedOrderQty,
       };
     }).sort((a, b) => a.monthsOfInventory - b.monthsOfInventory);
 
     // Alert if 3 months or less (2 months lead time + 1 month buffer)
-    // Note: If monthsOfInventory is 0, it means they are out of stock. Include them in reorder alerts.
     const reorderAlerts = projectionsByCategory.filter(p => p.monthsOfInventory <= 3);
 
     return {
@@ -115,6 +138,7 @@ export function useDashboard() {
       potentialProfit,
       outOfStock,
       lowStock,
+      obsoleteCount,
       byCategory,
       topExpensive,
       lowStockProducts,
