@@ -168,7 +168,7 @@ export default function DashboardPage() {
                     <div className="text-xs font-medium text-[rgb(var(--text-secondary))] mt-0.5">Dura: {alert.monthsOfInventory} meses</div>
                   </div>
                   <div className="text-right whitespace-nowrap">
-                    <div className="text-sm font-black text-[rgb(var(--bg-dark))]">Comprar: {alert.suggestedOrderQty}</div>
+                    <div className="text-sm font-black text-[rgb(var(--bg-dark))]">Comprar: {alert.suggestedOrderQty.toLocaleString()} uds</div>
                   </div>
                 </div>
               ))
