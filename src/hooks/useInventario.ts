@@ -13,7 +13,7 @@ export interface Movement {
   note: string;
 }
 
-const STORAGE_MOVEMENTS_KEY = 'stockly_movements_v3';
+const STORAGE_MOVEMENTS_KEY = 'stockly_movements_v4';
 
 function getLocalMovements(): Movement[] {
   if (typeof window === 'undefined') return [];
@@ -43,42 +43,78 @@ export function useInventario() {
       if (localMovs.length === 0 && products.length > 0) {
         const seeded: Movement[] = [];
         const now = new Date();
+        let isEarliestSetted = false;
+
+        const targetMonthsByCategory: Record<string, number> = {
+          'Lectura': 1.5,
+          'Ciclismo': 2.5,
+          'Goggles': 3.5,
+          'Seguridad': 4.8,
+          'Clip-On': 6.2,
+          'Blue Light': 8.0,
+          'Sport': 2.0,
+          'Solar': 10.5,
+          'Natación': 1.8,
+          'Oftálmico': 12.0
+        };
+
+        const getTargetMonths = (categoryName: string | undefined): number => {
+          if (!categoryName) return 5.0;
+          const name = categoryName.trim();
+          for (const [key, value] of Object.entries(targetMonthsByCategory)) {
+            if (key.toLowerCase() === name.toLowerCase()) {
+              return value;
+            }
+          }
+          return 5.0;
+        };
         
         products.forEach((p, idx) => {
-          // 1. Initial entrada
+          // 6.7% of products (every 15th product) are obsolete (no sales)
+          const isObsolete = idx % 15 === 0;
+
+          let totalQtySold = 0;
+          if (!isObsolete && p.stock > 0) {
+            const T = getTargetMonths(p.category_name);
+            totalQtySold = Math.round((p.stock / T) * 3);
+            if (totalQtySold === 0) totalQtySold = 1;
+          }
+
+          // 1. Initial entrada (covers current stock + sales)
           seeded.push({
             id: `seed-in-${p.sku}-${idx}`,
             sku: p.sku,
             product: p.name,
             type: 'entrada',
-            qty: (p.stock || 0) + Math.floor(Math.random() * 50) + 10,
+            qty: (p.stock || 0) + totalQtySold,
             date: new Date(now.getTime() - 120 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
             note: 'Inventario inicial demo'
           });
 
-          // Simulate obsolescence (20% of products)
-          const isObsolete = idx % 5 === 0;
+          if (totalQtySold > 0) {
+            // Distribute totalQtySold across 3 to 7 sales
+            const numSales = Math.min(totalQtySold, Math.floor(Math.random() * 5) + 3);
+            let remainingQty = totalQtySold;
 
-          if (!isObsolete) {
-            // High velocity for some to trigger reorder alerts
-            const categorySpeed = (p.category_name?.length || 5) % 3; // 0: slow, 1: medium, 2: fast
-            let numSales = 0;
-            
-            if (categorySpeed === 2) numSales = Math.floor(Math.random() * 8) + 4; // Fast
-            else if (categorySpeed === 1) numSales = Math.floor(Math.random() * 4) + 2; // Med
-            else numSales = Math.floor(Math.random() * 2) + 1; // Slow
-            
             for (let i = 0; i < numSales; i++) {
-              const daysAgo = Math.floor(Math.random() * 85) + 1;
+              let qtySold = 0;
+              if (i === numSales - 1) {
+                qtySold = remainingQty;
+              } else {
+                const avg = Math.ceil(remainingQty / (numSales - i));
+                const randQty = Math.max(1, Math.floor(Math.random() * (avg * 0.8)) + Math.ceil(avg * 0.6));
+                qtySold = Math.min(remainingQty - (numSales - 1 - i), randQty);
+                if (qtySold < 1) qtySold = 1;
+                remainingQty -= qtySold;
+              }
+
+              let daysAgo = Math.floor(Math.random() * 89) + 1; // 1 to 89 days ago
+              if (!isEarliestSetted) {
+                daysAgo = 90; // Ensure at least one sale is exactly 90 days ago for math calibration
+                isEarliestSetted = true;
+              }
               const saleDate = new Date(now.getTime() - daysAgo * 24 * 60 * 60 * 1000);
-              
-              // Scale qty sold to match stock size to trigger <3 months inventory
-              let baseQty = p.stock > 0 ? Math.ceil(p.stock / numSales) : 10;
-              if (categorySpeed === 2) baseQty = Math.ceil(baseQty * 1.5); // Sell very fast
-              if (categorySpeed === 0) baseQty = Math.ceil(baseQty * 0.2); // Sell very slow
-              
-              const qtySold = Math.max(1, Math.floor(Math.random() * baseQty) + Math.ceil(baseQty / 2));
-              
+
               seeded.push({
                 id: `seed-out-${p.sku}-${idx}-${i}`,
                 sku: p.sku,
