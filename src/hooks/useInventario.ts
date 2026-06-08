@@ -13,7 +13,7 @@ export interface Movement {
   note: string;
 }
 
-const STORAGE_MOVEMENTS_KEY = 'stockly_inventory_movements';
+const STORAGE_MOVEMENTS_KEY = 'stockly_movements_v2';
 
 function getLocalMovements(): Movement[] {
   if (typeof window === 'undefined') return [];
@@ -41,19 +41,48 @@ export function useInventario() {
       const localMovs = getLocalMovements();
 
       if (localMovs.length === 0 && products.length > 0) {
-        // Seed some initial movements from products to look realistic
-        const seeded: Movement[] = products.slice(0, 10).map((p, idx) => {
-          const qty = p.stock > 0 ? p.stock : 10;
-          return {
-            id: `seeded-mov-${p.sku}-${idx}`,
+        const seeded: Movement[] = [];
+        const now = new Date();
+        
+        products.forEach((p, idx) => {
+          // 1. Initial entrada to justify current stock
+          seeded.push({
+            id: `seed-in-${p.sku}-${idx}`,
             sku: p.sku,
             product: p.name,
-            type: 'entrada' as const,
-            qty: qty,
-            date: p.date || new Date().toISOString().split('T')[0],
-            note: 'Inventario inicial (Google Sheets)'
-          };
+            type: 'entrada',
+            qty: (p.stock || 0) + Math.floor(Math.random() * 50),
+            date: new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+            note: 'Inventario inicial demo'
+          });
+
+          // 2. Generate random salidas to simulate sales velocity over the last 3 months
+          // Randomize velocity to create fluctuations
+          const categorySpeed = (p.category_name?.length || 5) % 3; // 0: slow, 1: medium, 2: fast
+          let numSales = 0;
+          
+          if (categorySpeed === 2) numSales = Math.floor(Math.random() * 15) + 5; // 5-19 sales
+          else if (categorySpeed === 1) numSales = Math.floor(Math.random() * 8) + 2; // 2-9 sales
+          else numSales = Math.floor(Math.random() * 3) + 1; // 1-3 sales
+          
+          for (let i = 0; i < numSales; i++) {
+            const daysAgo = Math.floor(Math.random() * 85) + 1; // 1 to 85 days ago
+            const saleDate = new Date(now.getTime() - daysAgo * 24 * 60 * 60 * 1000);
+            const qtySold = Math.floor(Math.random() * 5) + 1; // 1 to 5 items per sale
+            
+            seeded.push({
+              id: `seed-out-${p.sku}-${idx}-${i}`,
+              sku: p.sku,
+              product: p.name,
+              type: 'salida',
+              qty: qtySold,
+              date: saleDate.toISOString().split('T')[0],
+              note: 'Venta simulada demo'
+            });
+          }
         });
+        
+        seeded.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
         saveLocalMovements(seeded);
         return seeded;
       }

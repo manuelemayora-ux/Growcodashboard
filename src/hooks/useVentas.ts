@@ -22,7 +22,7 @@ export interface Sale {
 }
 
 const STORAGE_SALES_KEY = 'stockly_sales';
-const STORAGE_MOVEMENTS_KEY = 'stockly_inventory_movements';
+const STORAGE_MOVEMENTS_KEY = 'stockly_movements_v2';
 
 function getLocalSales(): Sale[] {
   if (typeof window === 'undefined') return [];
