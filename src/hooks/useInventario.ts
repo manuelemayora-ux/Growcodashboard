@@ -13,7 +13,7 @@ export interface Movement {
   note: string;
 }
 
-const STORAGE_MOVEMENTS_KEY = 'stockly_movements_v5';
+const STORAGE_MOVEMENTS_KEY = 'stockly_movements_v6';
 
 function getLocalMovements(): Movement[] {
   if (typeof window === 'undefined') return [];
@@ -27,7 +27,11 @@ function getLocalMovements(): Movement[] {
 
 function saveLocalMovements(movements: Movement[]) {
   if (typeof window === 'undefined') return;
-  localStorage.setItem(STORAGE_MOVEMENTS_KEY, JSON.stringify(movements));
+  try {
+    localStorage.setItem(STORAGE_MOVEMENTS_KEY, JSON.stringify(movements));
+  } catch (e) {
+    console.error("Failed to save movements to localStorage:", e);
+  }
 }
 
 export function useInventario() {
@@ -81,51 +85,36 @@ export function useInventario() {
             if (totalQtySold === 0) totalQtySold = 1;
           }
 
-          // 1. Initial entrada (covers current stock + sales)
-          seeded.push({
-            id: `seed-in-${p.sku}-${idx}`,
-            sku: p.sku,
-            product: p.name,
-            type: 'entrada',
-            qty: (p.stock || 0) + totalQtySold,
-            date: new Date(now.getTime() - 120 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-            note: 'Inventario inicial demo'
-          });
+          // Generate a few initial entrada movements for UI realism (about 50 entries)
+          if (idx % 60 === 0) {
+            seeded.push({
+              id: `seed-in-${p.sku}-${idx}`,
+              sku: p.sku,
+              product: p.name,
+              type: 'entrada',
+              qty: (p.stock || 0) + 100,
+              date: new Date(now.getTime() - 120 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+              note: 'Inventario inicial demo'
+            });
+          }
 
           if (totalQtySold > 0) {
-            // Distribute totalQtySold across 3 to 7 sales
-            const numSales = Math.min(totalQtySold, Math.floor(Math.random() * 5) + 3);
-            let remainingQty = totalQtySold;
-
-            for (let i = 0; i < numSales; i++) {
-              let qtySold = 0;
-              if (i === numSales - 1) {
-                qtySold = remainingQty;
-              } else {
-                const avg = Math.ceil(remainingQty / (numSales - i));
-                const randQty = Math.max(1, Math.floor(Math.random() * (avg * 0.8)) + Math.ceil(avg * 0.6));
-                qtySold = Math.min(remainingQty - (numSales - 1 - i), randQty);
-                if (qtySold < 1) qtySold = 1;
-                remainingQty -= qtySold;
-              }
-
-              let daysAgo = Math.floor(Math.random() * 89) + 1; // 1 to 89 days ago
-              if (!isEarliestSetted) {
-                daysAgo = 90; // Ensure at least one sale is exactly 90 days ago for math calibration
-                isEarliestSetted = true;
-              }
-              const saleDate = new Date(now.getTime() - daysAgo * 24 * 60 * 60 * 1000);
-
-              seeded.push({
-                id: `seed-out-${p.sku}-${idx}-${i}`,
-                sku: p.sku,
-                product: p.name,
-                type: 'salida',
-                qty: qtySold,
-                date: saleDate.toISOString().split('T')[0],
-                note: 'Venta simulada demo'
-              });
+            let daysAgo = Math.floor(Math.random() * 89) + 1; // 1 to 89 days ago
+            if (!isEarliestSetted) {
+              daysAgo = 90; // Ensure at least one sale is exactly 90 days ago for math calibration
+              isEarliestSetted = true;
             }
+            const saleDate = new Date(now.getTime() - daysAgo * 24 * 60 * 60 * 1000);
+
+            seeded.push({
+              id: `seed-out-${p.sku}-${idx}`,
+              sku: p.sku,
+              product: p.name,
+              type: 'salida',
+              qty: totalQtySold,
+              date: saleDate.toISOString().split('T')[0],
+              note: 'Venta simulada demo'
+            });
           }
         });
         
