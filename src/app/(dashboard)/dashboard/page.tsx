@@ -294,14 +294,14 @@ export default function DashboardPage() {
         </div>
 
         {/* Table representation */}
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="border-b border-[rgb(var(--border))]">
-                <th className="py-3.5 px-4 text-xs font-bold uppercase tracking-wider text-[rgb(var(--text-secondary))] w-1/4">Categoría</th>
-                <th className="py-3.5 px-4 text-xs font-bold uppercase tracking-wider text-[rgb(var(--text-secondary))] w-1/4">Top 1</th>
-                <th className="py-3.5 px-4 text-xs font-bold uppercase tracking-wider text-[rgb(var(--text-secondary))] w-1/4">Top 2</th>
-                <th className="py-3.5 px-4 text-xs font-bold uppercase tracking-wider text-[rgb(var(--text-secondary))] w-1/4">Top 3</th>
+        <div className="overflow-x-auto max-h-[310px] overflow-y-auto pr-1 custom-scrollbar">
+          <table className="w-full text-left border-collapse relative">
+            <thead className="sticky top-0 bg-white z-10 shadow-[0_1px_0_0_rgb(var(--border))]">
+              <tr>
+                <th className="py-3 px-4 text-xs font-bold uppercase tracking-wider text-[rgb(var(--text-secondary))] w-1/4 bg-white">Categoría</th>
+                <th className="py-3 px-4 text-xs font-bold uppercase tracking-wider text-[rgb(var(--text-secondary))] w-1/4 bg-white">Top 1</th>
+                <th className="py-3 px-4 text-xs font-bold uppercase tracking-wider text-[rgb(var(--text-secondary))] w-1/4 bg-white">Top 2</th>
+                <th className="py-3 px-4 text-xs font-bold uppercase tracking-wider text-[rgb(var(--text-secondary))] w-1/4 bg-white">Top 3</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[rgb(var(--border))]">
@@ -314,20 +314,29 @@ export default function DashboardPage() {
               ) : (
                 bestSellersByCategory.map((row) => (
                   <tr key={row.categoryName} className="hover:bg-[rgb(var(--bg-input))]/30 transition-colors">
-                    <td className="py-4 px-4 align-middle">
-                      <span className="text-sm font-bold text-[rgb(var(--bg-dark))]">{row.categoryName}</span>
+                    <td className="py-3.5 px-4 align-middle">
+                      <div className="border-l-2 border-[rgb(var(--cyan))] pl-3 py-1 font-bold text-sm text-[rgb(var(--bg-dark))]">
+                        {row.categoryName}
+                      </div>
                     </td>
                     {[0, 1, 2].map((idx) => {
                       const p = row.products[idx];
+                      const badgeClasses = [
+                        "text-[rgb(var(--amber-main))] bg-[rgb(var(--amber-main))]/10 border border-[rgb(var(--amber-main))]/20",
+                        "text-[rgb(var(--cyan-bright))] bg-[rgb(var(--cyan-bright))]/10 border border-[rgb(var(--cyan-bright))]/20",
+                        "text-[rgb(var(--text-secondary))] bg-[rgb(var(--bg-input))] border border-[rgb(var(--border))]"
+                      ];
+                      const rankText = ["Nº 1", "Nº 2", "Nº 3"];
+                      
                       return (
-                        <td key={idx} className="py-4 px-4 align-middle">
+                        <td key={idx} className="py-3.5 px-4 align-middle">
                           {p ? (
                             <div className="flex flex-col">
                               <span className="text-sm font-semibold text-[rgb(var(--bg-dark))] truncate max-w-[200px]" title={p.name}>
                                 {p.name}
                               </span>
-                              <span className="text-xs font-bold mt-1 text-[rgb(var(--cyan-bright))] bg-[rgb(var(--bg-input))] px-2 py-0.5 rounded-full w-fit">
-                                {p.sales.toLocaleString()} uds
+                              <span className={`text-[10px] font-bold mt-1.5 px-2.5 py-0.5 rounded-full w-fit tracking-wide uppercase ${badgeClasses[idx]}`}>
+                                {rankText[idx]} · {p.sales.toLocaleString()} uds
                               </span>
                             </div>
                           ) : (
