@@ -13,7 +13,7 @@ export interface Movement {
   note: string;
 }
 
-const STORAGE_MOVEMENTS_KEY = 'stockly_movements_v2';
+const STORAGE_MOVEMENTS_KEY = 'stockly_movements_v3';
 
 function getLocalMovements(): Movement[] {
   if (typeof window === 'undefined') return [];
@@ -45,40 +45,50 @@ export function useInventario() {
         const now = new Date();
         
         products.forEach((p, idx) => {
-          // 1. Initial entrada to justify current stock
+          // 1. Initial entrada
           seeded.push({
             id: `seed-in-${p.sku}-${idx}`,
             sku: p.sku,
             product: p.name,
             type: 'entrada',
-            qty: (p.stock || 0) + Math.floor(Math.random() * 50),
-            date: new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+            qty: (p.stock || 0) + Math.floor(Math.random() * 50) + 10,
+            date: new Date(now.getTime() - 120 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
             note: 'Inventario inicial demo'
           });
 
-          // 2. Generate random salidas to simulate sales velocity over the last 3 months
-          // Randomize velocity to create fluctuations
-          const categorySpeed = (p.category_name?.length || 5) % 3; // 0: slow, 1: medium, 2: fast
-          let numSales = 0;
-          
-          if (categorySpeed === 2) numSales = Math.floor(Math.random() * 15) + 5; // 5-19 sales
-          else if (categorySpeed === 1) numSales = Math.floor(Math.random() * 8) + 2; // 2-9 sales
-          else numSales = Math.floor(Math.random() * 3) + 1; // 1-3 sales
-          
-          for (let i = 0; i < numSales; i++) {
-            const daysAgo = Math.floor(Math.random() * 85) + 1; // 1 to 85 days ago
-            const saleDate = new Date(now.getTime() - daysAgo * 24 * 60 * 60 * 1000);
-            const qtySold = Math.floor(Math.random() * 5) + 1; // 1 to 5 items per sale
+          // Simulate obsolescence (20% of products)
+          const isObsolete = idx % 5 === 0;
+
+          if (!isObsolete) {
+            // High velocity for some to trigger reorder alerts
+            const categorySpeed = (p.category_name?.length || 5) % 3; // 0: slow, 1: medium, 2: fast
+            let numSales = 0;
             
-            seeded.push({
-              id: `seed-out-${p.sku}-${idx}-${i}`,
-              sku: p.sku,
-              product: p.name,
-              type: 'salida',
-              qty: qtySold,
-              date: saleDate.toISOString().split('T')[0],
-              note: 'Venta simulada demo'
-            });
+            if (categorySpeed === 2) numSales = Math.floor(Math.random() * 8) + 4; // Fast
+            else if (categorySpeed === 1) numSales = Math.floor(Math.random() * 4) + 2; // Med
+            else numSales = Math.floor(Math.random() * 2) + 1; // Slow
+            
+            for (let i = 0; i < numSales; i++) {
+              const daysAgo = Math.floor(Math.random() * 85) + 1;
+              const saleDate = new Date(now.getTime() - daysAgo * 24 * 60 * 60 * 1000);
+              
+              // Scale qty sold to match stock size to trigger <3 months inventory
+              let baseQty = p.stock > 0 ? Math.ceil(p.stock / numSales) : 10;
+              if (categorySpeed === 2) baseQty = Math.ceil(baseQty * 1.5); // Sell very fast
+              if (categorySpeed === 0) baseQty = Math.ceil(baseQty * 0.2); // Sell very slow
+              
+              const qtySold = Math.max(1, Math.floor(Math.random() * baseQty) + Math.ceil(baseQty / 2));
+              
+              seeded.push({
+                id: `seed-out-${p.sku}-${idx}-${i}`,
+                sku: p.sku,
+                product: p.name,
+                type: 'salida',
+                qty: qtySold,
+                date: saleDate.toISOString().split('T')[0],
+                note: 'Venta simulada demo'
+              });
+            }
           }
         });
         

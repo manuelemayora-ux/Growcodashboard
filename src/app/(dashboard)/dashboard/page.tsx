@@ -152,7 +152,7 @@ export default function DashboardPage() {
           <div className="absolute top-0 right-0 w-32 h-32 bg-[rgb(var(--amber-main))] opacity-10 blur-2xl rounded-full"></div>
           <div className="mb-5 flex items-center gap-2 relative z-10">
             <ShoppingCart className="h-5 w-5 text-[rgb(var(--amber-main))]" />
-            <h2 className="text-base font-bold text-[rgb(var(--bg-dark))]">Órdenes Sugeridas</h2>
+            <h2 className="text-base font-bold text-[rgb(var(--bg-dark))]">Stock bajo Generar orden de compra</h2>
           </div>
           <p className="text-xs font-medium text-[rgb(var(--text-secondary))] mb-4 relative z-10">
             Volumen para 3 meses (Lead time + stock seguro).
