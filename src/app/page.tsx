@@ -385,12 +385,33 @@ export default function LandingPage() {
                 <div className="flex h-16 w-16 items-center justify-center rounded-[20px] bg-[rgb(var(--accent))] text-[rgb(var(--text-on-accent))] shadow-lg shadow-[rgba(204,255,0,0.3)]">
                   <Palette className="h-8 w-8 drop-shadow-sm" />
                 </div>
+
+                {/* Branding Customization Preview Widget */}
+                <div className="my-6 bg-slate-50/70 dark:bg-slate-900/40 border border-gray-100 dark:border-white/5 rounded-3xl p-5 flex flex-col gap-3 shadow-inner backdrop-blur-md">
+                  <div className="flex items-center gap-2 text-xs font-mono text-[rgb(var(--text-secondary))] dark:text-slate-300">
+                    <span className="h-2 w-2 rounded-full bg-green-500 animate-pulse"></span>
+                    <span className="font-bold">https://tu-empresa.com</span>
+                  </div>
+                  <div className="flex items-center justify-between border-t border-b border-gray-100/50 dark:border-white/5 py-2.5 my-0.5">
+                    <span className="text-[10px] font-black uppercase tracking-wider text-[rgb(var(--text-dim))]">Logotipo Corporativo</span>
+                    <span className="bg-[rgb(var(--cyan-dim))] dark:bg-cyan-950/40 px-2 py-0.5 rounded-full text-[9px] font-black text-[rgb(var(--blue-deep))] dark:text-[rgb(var(--cyan))]">
+                      Activo
+                    </span>
+                  </div>
+                  <div className="flex gap-2">
+                    <div className="h-5 w-5 rounded-full bg-[rgb(var(--cyan))] ring-2 ring-white dark:ring-slate-950 shadow-sm"></div>
+                    <div className="h-5 w-5 rounded-full bg-[rgb(var(--blue-deep))] shadow-sm"></div>
+                    <div className="h-5 w-5 rounded-full bg-[rgb(var(--accent))] shadow-sm"></div>
+                    <div className="h-5 w-5 rounded-full bg-purple-500 shadow-sm"></div>
+                    <div className="h-5 w-5 rounded-full bg-emerald-500 shadow-sm"></div>
+                  </div>
+                </div>
                 
                 <div>
-                  <h3 className="text-3xl font-black text-[rgb(var(--bg-dark))] dark:text-white mt-8 leading-tight">
+                  <h3 className="text-3xl font-black text-[rgb(var(--bg-dark))] dark:text-white leading-tight">
                     Presencia de<br/>tu Identidad
                   </h3>
-                  <p className="mt-4 text-base font-semibold text-[rgb(var(--text-secondary))] dark:text-gray-300 leading-relaxed">
+                  <p className="mt-3 text-base font-semibold text-[rgb(var(--text-secondary))] dark:text-gray-300 leading-relaxed">
                     No es un software genérico de marca blanca. El sistema se despliega con tu logotipo, colores corporativos y dominio propio, proyectando el máximo nivel de profesionalismo.
                   </p>
                 </div>
