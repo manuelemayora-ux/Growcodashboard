@@ -128,7 +128,7 @@ export default function DashboardPage() {
             </div>
           </div>
           <div className="mt-4">
-            <div className="stat-value text-white text-xl sm:text-2xl lg:text-3xl">{stats.totalProducts}</div>
+            <div className="stat-value text-white text-xl sm:text-2xl md:text-xl lg:text-2xl xl:text-3xl truncate">{stats.totalProducts}</div>
             <div className="mt-1 text-xs font-medium text-white/50 truncate">{stats.totalStock.toLocaleString()} uds</div>
           </div>
         </div>
@@ -143,7 +143,7 @@ export default function DashboardPage() {
             </div>
           </div>
           <div className="mt-4 relative z-10">
-            <div className="stat-value font-mono-price text-white text-xl sm:text-2xl lg:text-3xl">${stats.inventoryValue.toLocaleString("en-US", { maximumFractionDigits: 0 })}</div>
+            <div className="stat-value font-mono-price text-white text-xl sm:text-2xl md:text-lg lg:text-xl xl:text-3xl truncate" title={`$${stats.inventoryValue.toLocaleString("en-US", { maximumFractionDigits: 0 })}`}>${stats.inventoryValue.toLocaleString("en-US", { maximumFractionDigits: 0 })}</div>
             <div className="mt-1 text-xs font-medium text-white/70 truncate">Costo invertido</div>
           </div>
         </div>
@@ -157,7 +157,7 @@ export default function DashboardPage() {
             </div>
           </div>
           <div className="mt-4">
-            <div className="stat-value font-mono-price text-[rgb(var(--bg-dark))] text-xl sm:text-2xl lg:text-3xl">
+            <div className="stat-value font-mono-price text-[rgb(var(--bg-dark))] text-xl sm:text-2xl md:text-lg lg:text-xl xl:text-3xl truncate" title={`$${stats.potentialProfit.toLocaleString("en-US", { maximumFractionDigits: 0 })}`}>
               ${stats.potentialProfit.toLocaleString("en-US", { maximumFractionDigits: 0 })}
             </div>
             <div className="mt-1 flex items-center gap-1 text-xs font-bold text-[rgb(var(--green-main))] truncate">
@@ -175,7 +175,7 @@ export default function DashboardPage() {
             </div>
           </div>
           <div className="mt-4">
-            <div className="stat-value text-[rgb(var(--bg-dark))] text-xl sm:text-2xl lg:text-3xl">{stats.obsoleteCount}</div>
+            <div className="stat-value text-[rgb(var(--bg-dark))] text-xl sm:text-2xl md:text-xl lg:text-2xl xl:text-3xl truncate">{stats.obsoleteCount}</div>
             <div className="mt-1 flex items-center gap-1 text-xs font-medium text-[rgb(var(--text-dim))] truncate">
               Sin ventas {'>'} 90 días
             </div>
@@ -192,11 +192,11 @@ export default function DashboardPage() {
           </div>
           <div className="mt-4 flex items-baseline gap-4">
             <div>
-              <span className="stat-value text-[rgb(var(--red-main))] text-xl sm:text-2xl lg:text-3xl">{stats.outOfStock}</span>
+              <span className="stat-value text-[rgb(var(--red-main))] text-xl sm:text-2xl md:text-xl lg:text-2xl xl:text-3xl truncate">{stats.outOfStock}</span>
               <span className="ml-1 text-xs font-medium text-[rgb(var(--text-secondary))]">agots.</span>
             </div>
             <div>
-              <span className="stat-value text-[rgb(var(--amber-main))] text-xl sm:text-2xl lg:text-3xl">{stats.lowStock}</span>
+              <span className="stat-value text-[rgb(var(--amber-main))] text-xl sm:text-2xl md:text-xl lg:text-2xl xl:text-3xl truncate">{stats.lowStock}</span>
               <span className="ml-1 text-xs font-medium text-[rgb(var(--text-secondary))]">bajos</span>
             </div>
           </div>
@@ -294,9 +294,9 @@ export default function DashboardPage() {
         </div>
 
         {/* Table representation */}
-        <div className="overflow-x-auto max-h-[310px] overflow-y-auto pr-1 custom-scrollbar">
+        <div className="overflow-x-auto max-h-[300px] overflow-y-auto pr-1 custom-scrollbar">
           <table className="w-full text-left border-collapse relative">
-            <thead className="sticky top-0 bg-white z-10 shadow-[0_1px_0_0_rgb(var(--border))]">
+            <thead className="sticky top-0 bg-white z-20 shadow-[0_1px_0_0_rgb(var(--border))]">
               <tr>
                 <th className="py-3 px-4 text-xs font-bold uppercase tracking-wider text-[rgb(var(--text-secondary))] w-1/4 bg-white">Categoría</th>
                 <th className="py-3 px-4 text-xs font-bold uppercase tracking-wider text-[rgb(var(--text-secondary))] w-1/4 bg-white">Top 1</th>
@@ -312,18 +312,18 @@ export default function DashboardPage() {
                   </td>
                 </tr>
               ) : (
-                bestSellersByCategory.map((row) => (
-                  <tr key={row.categoryName} className="hover:bg-[rgb(var(--bg-input))]/30 transition-colors">
+                bestSellersByCategory.map((row, rowIndex) => (
+                  <tr key={row.categoryName} className={`transition-colors hover:bg-[rgb(var(--bg-input))]/60 ${rowIndex % 2 === 0 ? 'bg-white' : 'bg-[rgb(var(--bg-base))]/50'}`}>
                     <td className="py-3.5 px-4 align-middle">
-                      <div className="border-l-2 border-[rgb(var(--cyan))] pl-3 py-1 font-bold text-sm text-[rgb(var(--bg-dark))]">
-                        {row.categoryName}
+                      <div className="flex items-center gap-2 border-l-2 border-[rgb(var(--cyan))] pl-3 py-1">
+                        <span className="font-bold text-sm text-[rgb(var(--bg-dark))]">{row.categoryName}</span>
                       </div>
                     </td>
                     {[0, 1, 2].map((idx) => {
                       const p = row.products[idx];
                       const badgeClasses = [
-                        "text-[rgb(var(--amber-main))] bg-[rgb(var(--amber-main))]/10 border border-[rgb(var(--amber-main))]/20",
-                        "text-[rgb(var(--cyan-bright))] bg-[rgb(var(--cyan-bright))]/10 border border-[rgb(var(--cyan-bright))]/20",
+                        "text-[rgb(var(--amber-main))] bg-[rgb(var(--amber-dim))] border border-[rgb(var(--amber-main))]/30 shadow-sm",
+                        "text-[rgb(var(--blue-deep))] bg-[rgb(var(--cyan-dim))] border border-[rgb(var(--cyan))]/30 shadow-sm",
                         "text-[rgb(var(--text-secondary))] bg-[rgb(var(--bg-input))] border border-[rgb(var(--border))]"
                       ];
                       const rankText = ["Nº 1", "Nº 2", "Nº 3"];
