@@ -252,52 +252,54 @@ export default function LandingPage() {
               </div>
             </div>
             
-            {/* HERO IMAGE - MASSIVE 3D TILT CARD */}
+            {/* HERO IMAGE - WRAPPER FOR FLOATING 3D CARDS */}
             <div className="hero-card-anim relative w-full flex items-center justify-center lg:justify-end">
-              <TiltCard className="relative w-full max-w-[120px] min-[400px]:max-w-[160px] sm:max-w-[320px] md:max-w-[450px] lg:max-w-[580px] aspect-square rounded-[16px] sm:rounded-[32px] lg:rounded-[48px] p-0 glass-premium border border-white/30 dark:border-white/5 shadow-md sm:shadow-2xl flex items-center justify-center overflow-hidden glow-border-trigger" maxTilt={12} scale={1.03}>
-                <div className="absolute inset-0 bg-gradient-to-tr from-[rgb(var(--cyan))]/20 via-[rgb(var(--blue-deep))]/10 to-transparent pointer-events-none blur-[40px]"></div>
+              <div className="relative w-full max-w-[120px] min-[400px]:max-w-[160px] sm:max-w-[320px] md:max-w-[450px] lg:max-w-[580px] aspect-square">
                 
-                {/* Card 1: Stock Crítico / Alertas (Top-Left) */}
-                <div className="absolute top-[6%] left-[-15%] sm:top-[8%] sm:left-[6%] p-1.5 sm:p-3 bg-white/90 dark:bg-slate-900/80 backdrop-blur-md border border-white/30 dark:border-white/10 rounded-xl sm:rounded-2xl shadow-md sm:shadow-xl animate-float flex items-center gap-1.5 sm:gap-3 z-30 pointer-events-none">
+                {/* 3D Tilt Card (Handles rotation & clipping) */}
+                <TiltCard className="relative w-full h-full rounded-[16px] sm:rounded-[32px] lg:rounded-[48px] p-0 glass-premium border border-white/30 dark:border-white/5 shadow-md sm:shadow-2xl flex items-center justify-center overflow-hidden glow-border-trigger" maxTilt={12} scale={1.03}>
+                  <div className="absolute inset-0 bg-gradient-to-tr from-[rgb(var(--cyan))]/20 via-[rgb(var(--blue-deep))]/10 to-transparent pointer-events-none blur-[40px]"></div>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src="/SaaSystem/12.png"
+                    alt="Growco Logo"
+                    className="w-full h-full object-cover relative z-20 drop-shadow-[0_20px_50px_rgba(0,51,255,0.3)] hover:scale-105 transition-transform duration-500 ease-out"
+                  />
+                </TiltCard>
+
+                {/* Card 1: Stock Crítico / Alertas (Outside TiltCard, absolute to the wrapper) */}
+                <div className="absolute top-[6%] left-[-30%] sm:top-[8%] sm:left-[-15%] p-1.5 sm:p-3 bg-white/95 dark:bg-slate-900/80 backdrop-blur-md border border-white/30 dark:border-white/10 rounded-xl sm:rounded-2xl shadow-md sm:shadow-xl animate-float flex items-center gap-1.5 sm:gap-3 z-30 pointer-events-none">
                   <div className="bg-red-50 dark:bg-red-950/40 p-1 sm:p-2 rounded-md sm:rounded-xl text-red-500">
                     <AlertCircle className="h-3 w-3 sm:h-5 w-5" />
                   </div>
-                  <div>
+                  <div className="whitespace-nowrap">
                     <div className="text-[7px] sm:text-[9px] md:text-[10px] text-red-500 font-extrabold uppercase tracking-wider">Stock Crítico</div>
                     <div className="text-[8px] sm:text-xs font-black text-gray-900 dark:text-white">5 ítems por reordenar</div>
                   </div>
                 </div>
 
-                {/* Card 2: Alta Rotación (Middle-Right) - contained inside card */}
-                <div className="absolute top-[42%] right-[-15%] sm:top-[45%] sm:right-[4%] p-1.5 sm:p-3 bg-white/90 dark:bg-slate-900/80 backdrop-blur-md border border-white/30 dark:border-white/10 rounded-xl sm:rounded-2xl shadow-md sm:shadow-xl z-30 animate-float pointer-events-none flex items-center gap-1.5 sm:gap-3" style={{ animationDelay: "3s" }}>
+                {/* Card 2: Alta Rotación (Outside TiltCard, absolute to the wrapper) */}
+                <div className="absolute top-[42%] right-[-30%] sm:top-[45%] sm:right-[-15%] p-1.5 sm:p-3 bg-white/95 dark:bg-slate-900/80 backdrop-blur-md border border-white/30 dark:border-white/10 rounded-xl sm:rounded-2xl shadow-md sm:shadow-xl z-30 animate-float pointer-events-none flex items-center gap-1.5 sm:gap-3" style={{ animationDelay: "3s" }}>
                   <div className="bg-[rgb(var(--accent-dim))] dark:bg-lime-950/40 p-1 sm:p-2 rounded-md sm:rounded-xl text-lime-600 dark:text-[rgb(var(--accent))]">
                     <TrendingUp className="h-3 w-3 sm:h-5 w-5" />
                   </div>
-                  <div>
+                  <div className="whitespace-nowrap">
                     <div className="text-[7px] sm:text-[9px] text-gray-500 dark:text-gray-400 font-extrabold uppercase tracking-wider">Alta Rotación</div>
                     <div className="text-[8px] sm:text-xs font-black text-gray-900 dark:text-white">Aro Aviator Solar</div>
                   </div>
                 </div>
 
-                {/* Card 3: Multi-Bodega (Bottom-Left) */}
-                <div className="absolute bottom-[8%] left-[-15%] sm:bottom-[10%] sm:left-[6%] p-1.5 sm:p-3 bg-white/90 dark:bg-slate-900/80 backdrop-blur-md border border-white/30 dark:border-white/10 rounded-xl sm:rounded-2xl shadow-md sm:shadow-xl z-30 animate-float pointer-events-none flex items-center gap-1.5 sm:gap-3" style={{ animationDelay: "1.5s" }}>
+                {/* Card 3: Multi-Bodega (Outside TiltCard, absolute to the wrapper) */}
+                <div className="absolute bottom-[8%] left-[-30%] sm:bottom-[10%] sm:left-[-15%] p-1.5 sm:p-3 bg-white/95 dark:bg-slate-900/80 backdrop-blur-md border border-white/30 dark:border-white/10 rounded-xl sm:rounded-2xl shadow-md sm:shadow-xl z-30 animate-float pointer-events-none flex items-center gap-1.5 sm:gap-3" style={{ animationDelay: "1.5s" }}>
                   <div className="bg-[rgb(var(--cyan-dim))] dark:bg-cyan-950/40 p-1 sm:p-2 rounded-md sm:rounded-xl text-[rgb(var(--blue-deep))] dark:text-[rgb(var(--cyan))]">
                     <Boxes className="h-3 w-3 sm:h-5 w-5" />
                   </div>
-                  <div>
+                  <div className="whitespace-nowrap">
                     <div className="text-[7px] sm:text-[9px] md:text-[10px] text-gray-500 dark:text-gray-400 font-extrabold uppercase tracking-wider">Multi-Bodega</div>
                     <div className="text-[8px] sm:text-xs font-black text-gray-900 dark:text-white">Sincronización activa</div>
                   </div>
                 </div>
-
-                {/* Primary Graphic - Enlarged G Logo */}
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src="/SaaSystem/12.png"
-                  alt="Growco Logo"
-                  className="w-full h-full object-cover relative z-20 drop-shadow-[0_20px_50px_rgba(0,51,255,0.3)] hover:scale-105 transition-transform duration-500 ease-out"
-                />
-              </TiltCard>
+              </div>
             </div>
           </div>
         </div>
