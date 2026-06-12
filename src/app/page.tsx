@@ -258,35 +258,35 @@ export default function LandingPage() {
                 <div className="absolute inset-0 bg-gradient-to-tr from-[rgb(var(--cyan))]/20 via-[rgb(var(--blue-deep))]/10 to-transparent pointer-events-none blur-[40px]"></div>
                 
                 {/* Card 1: Stock Crítico / Alertas (Top-Left) */}
-                <div className="absolute top-[8%] left-[6%] p-3 md:p-3.5 bg-white/85 dark:bg-slate-900/75 backdrop-blur-md border border-white/30 dark:border-white/10 rounded-2xl shadow-xl animate-float hidden sm:flex items-center gap-3 z-30 pointer-events-none">
-                  <div className="bg-red-50 dark:bg-red-950/40 p-2 rounded-xl text-red-500">
-                    <AlertCircle className="h-5 w-5" />
+                <div className="absolute top-[6%] left-[-15%] sm:top-[8%] sm:left-[6%] p-1.5 sm:p-3 bg-white/90 dark:bg-slate-900/80 backdrop-blur-md border border-white/30 dark:border-white/10 rounded-xl sm:rounded-2xl shadow-md sm:shadow-xl animate-float flex items-center gap-1.5 sm:gap-3 z-30 pointer-events-none">
+                  <div className="bg-red-50 dark:bg-red-950/40 p-1 sm:p-2 rounded-md sm:rounded-xl text-red-500">
+                    <AlertCircle className="h-3 w-3 sm:h-5 w-5" />
                   </div>
                   <div>
-                    <div className="text-[9px] md:text-[10px] text-red-500 font-extrabold uppercase tracking-wider">Stock Crítico</div>
-                    <div className="text-xs font-black text-gray-900 dark:text-white">5 ítems por reordenar</div>
+                    <div className="text-[7px] sm:text-[9px] md:text-[10px] text-red-500 font-extrabold uppercase tracking-wider">Stock Crítico</div>
+                    <div className="text-[8px] sm:text-xs font-black text-gray-900 dark:text-white">5 ítems por reordenar</div>
                   </div>
                 </div>
 
                 {/* Card 2: Alta Rotación (Middle-Right) - contained inside card */}
-                <div className="absolute top-[45%] right-[4%] p-3 bg-white/85 dark:bg-slate-900/75 backdrop-blur-md border border-white/30 dark:border-white/10 rounded-2xl shadow-xl z-30 animate-float pointer-events-none hidden sm:flex items-center gap-3" style={{ animationDelay: "3s" }}>
-                  <div className="bg-[rgb(var(--accent-dim))] dark:bg-lime-950/40 p-2 rounded-xl text-lime-600 dark:text-[rgb(var(--accent))]">
-                    <TrendingUp className="h-5 w-5" />
+                <div className="absolute top-[42%] right-[-15%] sm:top-[45%] sm:right-[4%] p-1.5 sm:p-3 bg-white/90 dark:bg-slate-900/80 backdrop-blur-md border border-white/30 dark:border-white/10 rounded-xl sm:rounded-2xl shadow-md sm:shadow-xl z-30 animate-float pointer-events-none flex items-center gap-1.5 sm:gap-3" style={{ animationDelay: "3s" }}>
+                  <div className="bg-[rgb(var(--accent-dim))] dark:bg-lime-950/40 p-1 sm:p-2 rounded-md sm:rounded-xl text-lime-600 dark:text-[rgb(var(--accent))]">
+                    <TrendingUp className="h-3 w-3 sm:h-5 w-5" />
                   </div>
                   <div>
-                    <div className="text-[9px] text-gray-500 dark:text-gray-400 font-extrabold uppercase tracking-wider">Alta Rotación</div>
-                    <div className="text-xs font-black text-gray-900 dark:text-white">Aro Aviator Solar</div>
+                    <div className="text-[7px] sm:text-[9px] text-gray-500 dark:text-gray-400 font-extrabold uppercase tracking-wider">Alta Rotación</div>
+                    <div className="text-[8px] sm:text-xs font-black text-gray-900 dark:text-white">Aro Aviator Solar</div>
                   </div>
                 </div>
 
                 {/* Card 3: Multi-Bodega (Bottom-Left) */}
-                <div className="absolute bottom-[10%] left-[6%] p-3 md:p-3.5 bg-white/85 dark:bg-slate-900/75 backdrop-blur-md border border-white/30 dark:border-white/10 rounded-2xl shadow-xl z-30 animate-float pointer-events-none hidden sm:flex items-center gap-3" style={{ animationDelay: "1.5s" }}>
-                  <div className="bg-[rgb(var(--cyan-dim))] dark:bg-cyan-950/40 p-2 rounded-xl text-[rgb(var(--blue-deep))] dark:text-[rgb(var(--cyan))]">
-                    <Boxes className="h-5 w-5" />
+                <div className="absolute bottom-[8%] left-[-15%] sm:bottom-[10%] sm:left-[6%] p-1.5 sm:p-3 bg-white/90 dark:bg-slate-900/80 backdrop-blur-md border border-white/30 dark:border-white/10 rounded-xl sm:rounded-2xl shadow-md sm:shadow-xl z-30 animate-float pointer-events-none flex items-center gap-1.5 sm:gap-3" style={{ animationDelay: "1.5s" }}>
+                  <div className="bg-[rgb(var(--cyan-dim))] dark:bg-cyan-950/40 p-1 sm:p-2 rounded-md sm:rounded-xl text-[rgb(var(--blue-deep))] dark:text-[rgb(var(--cyan))]">
+                    <Boxes className="h-3 w-3 sm:h-5 w-5" />
                   </div>
                   <div>
-                    <div className="text-[9px] md:text-[10px] text-gray-500 dark:text-gray-400 font-extrabold uppercase tracking-wider">Multi-Bodega</div>
-                    <div className="text-xs font-black text-gray-900 dark:text-white">Sincronización activa</div>
+                    <div className="text-[7px] sm:text-[9px] md:text-[10px] text-gray-500 dark:text-gray-400 font-extrabold uppercase tracking-wider">Multi-Bodega</div>
+                    <div className="text-[8px] sm:text-xs font-black text-gray-900 dark:text-white">Sincronización activa</div>
                   </div>
                 </div>
 
