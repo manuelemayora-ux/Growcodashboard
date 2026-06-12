@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import {
   Package, BarChart3, ShoppingCart, Shield, ArrowRight,
   Check, Boxes, Users, Palette, Layers3,
@@ -12,6 +12,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
 import FloatingOrbs from "@/components/floating-orbs";
 import TiltCard from "@/components/tilt-card";
+import ContactModal from "@/components/contact-modal";
 
 // Register ScrollTrigger client-side
 if (typeof window !== "undefined") {
@@ -20,6 +21,8 @@ if (typeof window !== "undefined") {
 
 export default function LandingPage() {
   const containerRef = useRef<HTMLDivElement>(null);
+  const [isContactOpen, setIsContactOpen] = useState(false);
+  const [contactType, setContactType] = useState<"llamada" | "contacto">("llamada");
 
   useGSAP(() => {
     // Disable animations if user prefers reduced motion
@@ -186,9 +189,12 @@ export default function LandingPage() {
             <span className="text-sm font-extrabold tracking-[0.2em] text-[rgb(var(--cyan-bright))] uppercase hidden sm:block">Stockly</span>
           </div>
           <div className="flex items-center gap-4">
-            <Link href="/login" className="hidden text-base font-semibold sm:block transition-colors hover:text-[rgb(var(--cyan-bright))] text-[rgb(var(--text-secondary))] dark:text-gray-300">
-              Acceder al Sistema
-            </Link>
+            <button 
+              onClick={() => { setContactType("llamada"); setIsContactOpen(true); }}
+              className="hidden text-base font-bold sm:block transition-colors hover:text-[rgb(var(--cyan-bright))] text-[rgb(var(--text-secondary))] dark:text-gray-300 cursor-pointer"
+            >
+              Agendar Llamada
+            </button>
             <Link href="/login" className="btn-primary py-3 px-8 text-base shadow-lg shadow-[rgba(0,209,255,0.3)] hover:scale-105 active:scale-95 transition-transform duration-200">
               Ver Demo
               <ArrowRight className="h-5 w-5" />
@@ -222,12 +228,15 @@ export default function LandingPage() {
 
               <div className="mt-10 flex flex-col items-start gap-4 sm:flex-row">
                 <Link href="/login" className="hero-btn-anim btn-primary text-lg px-10 py-4 shadow-[0_10px_40px_rgba(0,209,255,0.4)] hover:scale-105 transition-transform duration-300">
-                  Explorar el Sistema
+                  Ingresar a la Demo
                   <ArrowRight className="h-5 w-5" />
                 </Link>
-                <a href="#modulos" className="hero-btn-anim btn-dark px-10 py-4 text-lg shadow-xl hover:bg-slate-900/90 hover:scale-105 transition-transform duration-300">
-                  Ver Módulos
-                </a>
+                <button 
+                  onClick={() => { setContactType("llamada"); setIsContactOpen(true); }}
+                  className="hero-btn-anim btn-dark px-10 py-4 text-lg shadow-xl hover:bg-slate-900/90 hover:scale-105 transition-transform duration-300 cursor-pointer flex items-center gap-2"
+                >
+                  Agendar Llamada
+                </button>
               </div>
             </div>
             
@@ -512,6 +521,12 @@ export default function LandingPage() {
           </p>
         </div>
       </footer>
+
+      <ContactModal 
+        isOpen={isContactOpen} 
+        onClose={() => setIsContactOpen(false)} 
+        defaultType={contactType}
+      />
     </div>
   );
 }

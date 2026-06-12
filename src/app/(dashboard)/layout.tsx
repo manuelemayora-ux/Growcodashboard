@@ -3,10 +3,13 @@
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
+import { useState } from "react";
 import {
   LayoutDashboard, Package, ShoppingCart, Users, Truck,
   BarChart3, Settings, LogOut, Boxes, FileText, Search,
+  Phone, MessageSquare,
 } from "lucide-react";
+import ContactModal from "@/components/contact-modal";
 
 const navSections = [
   {
@@ -14,6 +17,7 @@ const navSections = [
     items: [
       { href: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
       { href: "/ventas", icon: ShoppingCart, label: "Nueva Venta" },
+      { href: "/leads", icon: MessageSquare, label: "Leads y Contacto" },
     ],
   },
   {
@@ -45,10 +49,10 @@ const bottomTabs = [
   { href: "/productos", icon: Package, label: "Productos" },
   { href: "/ventas", icon: ShoppingCart, label: "Venta" },
   { href: "/clientes", icon: Users, label: "Clientes" },
-  { href: "/reportes", icon: BarChart3, label: "Reportes" },
+  { href: "/leads", icon: MessageSquare, label: "Leads" },
 ];
 
-function Sidebar() {
+function Sidebar({ onOpenContact }: { onOpenContact: (type?: "llamada" | "contacto") => void }) {
   const pathname = usePathname();
 
   return (
@@ -99,6 +103,17 @@ function Sidebar() {
         ))}
       </nav>
 
+      {/* CTA: Agendar Llamada */}
+      <div className="px-6 pb-2">
+        <button
+          onClick={() => onOpenContact("llamada")}
+          className="btn-primary w-full py-3.5 text-xs font-black rounded-2xl shadow-md flex items-center justify-center gap-2 cursor-pointer hover:scale-[1.02] active:scale-95 transition-transform"
+        >
+          <Phone className="h-4 w-4" />
+          Agendar Llamada
+        </button>
+      </div>
+
       {/* User */}
       <div className="p-6">
         <div className="flex items-center gap-3 rounded-2xl p-4 bg-[rgb(var(--bg-input))] border border-[rgb(var(--border))] hover:border-[rgb(var(--cyan-dim))] transition-colors cursor-pointer">
@@ -109,7 +124,13 @@ function Sidebar() {
             <div className="truncate text-sm font-bold text-[rgb(var(--bg-dark))]">Administrador</div>
             <div className="text-[11px] font-semibold tracking-wide uppercase text-[rgb(var(--cyan-bright))]">Owner</div>
           </div>
-          <button style={{ color: 'rgb(var(--text-dim))' }} className="transition-colors hover:text-[rgb(var(--red-main))]">
+          <button 
+            onClick={() => {
+              window.location.href = "/SaaSystem/login";
+            }}
+            style={{ color: 'rgb(var(--text-dim))' }} 
+            className="transition-colors hover:text-[rgb(var(--red-main))] cursor-pointer"
+          >
             <LogOut className="h-5 w-5" />
           </button>
         </div>
@@ -145,17 +166,31 @@ function BottomTabs() {
 }
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
+  const [isContactOpen, setIsContactOpen] = useState(false);
+  const [contactType, setContactType] = useState<"llamada" | "contacto">("llamada");
+
+  const openContact = (type: "llamada" | "contacto" = "llamada") => {
+    setContactType(type);
+    setIsContactOpen(true);
+  };
+
   return (
     <div className="min-h-screen" style={{ background: 'rgb(var(--bg-base))' }}>
-      <Sidebar />
+      <Sidebar onOpenContact={openContact} />
       <main className="min-h-screen pb-24 transition-all md:ml-[280px] md:pb-0">
         {/* Mobile Header */}
         <header className="flex items-center justify-between px-6 py-4 bg-white border-b border-[rgb(var(--border))] md:hidden sticky top-0 z-30 shadow-sm">
-           <div className="flex items-center gap-2">
+           <div className="flex items-center gap-2 cursor-pointer" onClick={() => openContact("llamada")}>
              <Image src="/SaaSystem/2.png" alt="Growco Logo" width={28} height={28} className="object-contain" />
              <span className="font-black text-[rgb(var(--bg-dark))]">GROWCO</span>
            </div>
-           <div className="flex h-8 w-8 items-center justify-center rounded-xl glass-cyan text-white text-xs font-bold">A</div>
+           <button 
+             onClick={() => openContact("llamada")}
+             className="flex h-8 px-3 items-center justify-center rounded-xl glass-cyan text-white text-xs font-bold gap-1 cursor-pointer"
+           >
+             <Phone className="h-3.5 w-3.5" />
+             Llamada
+           </button>
         </header>
 
         <div className="mx-auto max-w-7xl px-4 py-8 md:px-10 md:py-10">
@@ -163,6 +198,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </div>
       </main>
       <BottomTabs />
+
+      <ContactModal 
+        isOpen={isContactOpen} 
+        onClose={() => setIsContactOpen(false)} 
+        defaultType={contactType}
+      />
     </div>
   );
 }

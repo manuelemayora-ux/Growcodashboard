@@ -4,7 +4,6 @@ import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { createClient } from "@/lib/supabase/client";
 
 export default function SignupPage() {
   const [name, setName] = useState("");
@@ -18,19 +17,7 @@ export default function SignupPage() {
     e.preventDefault();
     setError("");
     setLoading(true);
-    const supabase = createClient();
-    const { error: authError } = await supabase.auth.signUp({
-      email,
-      password,
-      options: { data: { full_name: name } },
-    });
-    
-    if (authError) {
-      setError(authError.message);
-      setLoading(false);
-      return;
-    }
-    
+    // Acceso demo directo
     router.push("/dashboard");
     router.refresh();
   };
@@ -70,17 +57,17 @@ export default function SignupPage() {
           <div>
             <label className="stat-label mb-2 block font-bold text-[rgb(var(--text-secondary))]">Nombre de tu empresa</label>
             <input type="text" value={name} onChange={(e) => setName(e.target.value)}
-              placeholder="Empresa S.A." className="w-full rounded-[20px] border-[2px] border-[rgb(var(--border))] bg-white/50 px-5 py-4 text-base outline-none transition-all font-semibold focus:border-[rgb(var(--cyan))] focus:shadow-[0_0_0_4px_rgba(0,209,255,0.15)] focus:bg-white" required />
+              placeholder="Empresa S.A." className="w-full rounded-[20px] border-[2px] border-[rgb(var(--border))] bg-white/50 px-5 py-4 text-base outline-none transition-all font-semibold focus:border-[rgb(var(--cyan))] focus:shadow-[0_0_0_4px_rgba(0,209,255,0.15)] focus:bg-white" />
           </div>
           <div>
             <label className="stat-label mb-2 block font-bold text-[rgb(var(--text-secondary))]">Correo Electrónico</label>
             <input type="email" value={email} onChange={(e) => setEmail(e.target.value)}
-              placeholder="tu@empresa.com" className="w-full rounded-[20px] border-[2px] border-[rgb(var(--border))] bg-white/50 px-5 py-4 text-base outline-none transition-all font-semibold focus:border-[rgb(var(--cyan))] focus:shadow-[0_0_0_4px_rgba(0,209,255,0.15)] focus:bg-white" required />
+              placeholder="tu@empresa.com" className="w-full rounded-[20px] border-[2px] border-[rgb(var(--border))] bg-white/50 px-5 py-4 text-base outline-none transition-all font-semibold focus:border-[rgb(var(--cyan))] focus:shadow-[0_0_0_4px_rgba(0,209,255,0.15)] focus:bg-white" />
           </div>
           <div>
             <label className="stat-label mb-2 block font-bold text-[rgb(var(--text-secondary))]">Contraseña</label>
             <input type="password" value={password} onChange={(e) => setPassword(e.target.value)}
-              placeholder="••••••••" className="w-full rounded-[20px] border-[2px] border-[rgb(var(--border))] bg-white/50 px-5 py-4 text-base outline-none transition-all font-semibold focus:border-[rgb(var(--cyan))] focus:shadow-[0_0_0_4px_rgba(0,209,255,0.15)] focus:bg-white" required minLength={6} />
+              placeholder="••••••••" className="w-full rounded-[20px] border-[2px] border-[rgb(var(--border))] bg-white/50 px-5 py-4 text-base outline-none transition-all font-semibold focus:border-[rgb(var(--cyan))] focus:shadow-[0_0_0_4px_rgba(0,209,255,0.15)] focus:bg-white" />
           </div>
           {error && <p className="text-center text-sm font-bold p-3 rounded-xl bg-[rgb(var(--red-dim))]" style={{ color: 'rgb(var(--red-main))' }}>{error}</p>}
           <button type="submit" disabled={loading} className="btn-primary w-full disabled:opacity-50 mt-4 py-4 text-lg shadow-[0_8px_24px_rgba(0,209,255,0.3)] rounded-[20px]">

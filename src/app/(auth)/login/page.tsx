@@ -4,7 +4,6 @@ import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { createClient } from "@/lib/supabase/client";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -17,13 +16,7 @@ export default function LoginPage() {
     e.preventDefault();
     setError("");
     setLoading(true);
-    const supabase = createClient();
-    const { error: authError } = await supabase.auth.signInWithPassword({ email, password });
-    if (authError) {
-      setError(authError.message === "Invalid login credentials" ? "Correo o contraseña incorrectos" : authError.message);
-      setLoading(false);
-      return;
-    }
+    // Acceso demo sin contraseña directo
     router.push("/dashboard");
     router.refresh();
   };
@@ -63,12 +56,12 @@ export default function LoginPage() {
           <div>
             <label className="stat-label mb-2 block font-bold text-[rgb(var(--text-secondary))]">Correo Electrónico</label>
             <input type="email" value={email} onChange={(e) => setEmail(e.target.value)}
-              placeholder="tu@email.com" className="w-full rounded-[20px] border-[2px] border-[rgb(var(--border))] bg-white/50 px-5 py-4 text-base outline-none transition-all font-semibold focus:border-[rgb(var(--cyan))] focus:shadow-[0_0_0_4px_rgba(0,209,255,0.15)] focus:bg-white" required />
+              placeholder="tu@email.com (cualquiera)" className="w-full rounded-[20px] border-[2px] border-[rgb(var(--border))] bg-white/50 px-5 py-4 text-base outline-none transition-all font-semibold focus:border-[rgb(var(--cyan))] focus:shadow-[0_0_0_4px_rgba(0,209,255,0.15)] focus:bg-white" />
           </div>
           <div>
             <label className="stat-label mb-2 block font-bold text-[rgb(var(--text-secondary))]">Contraseña</label>
             <input type="password" value={password} onChange={(e) => setPassword(e.target.value)}
-              placeholder="••••••••" className="w-full rounded-[20px] border-[2px] border-[rgb(var(--border))] bg-white/50 px-5 py-4 text-base outline-none transition-all font-semibold focus:border-[rgb(var(--cyan))] focus:shadow-[0_0_0_4px_rgba(0,209,255,0.15)] focus:bg-white" required />
+              placeholder="cualquier contraseña" className="w-full rounded-[20px] border-[2px] border-[rgb(var(--border))] bg-white/50 px-5 py-4 text-base outline-none transition-all font-semibold focus:border-[rgb(var(--cyan))] focus:shadow-[0_0_0_4px_rgba(0,209,255,0.15)] focus:bg-white" />
           </div>
           {error && <p className="text-center text-sm font-bold p-3 rounded-xl bg-[rgb(var(--red-dim))]" style={{ color: 'rgb(var(--red-main))' }}>{error}</p>}
           <button type="submit" disabled={loading} className="btn-primary w-full disabled:opacity-50 mt-4 py-4 text-lg shadow-[0_8px_24px_rgba(0,209,255,0.3)] rounded-[20px]">
