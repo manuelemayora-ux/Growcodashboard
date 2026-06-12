@@ -186,7 +186,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
            </div>
            <button 
              onClick={() => openContact("llamada")}
-             className="flex h-8 px-3 items-center justify-center rounded-xl glass-cyan text-white text-xs font-bold gap-1 cursor-pointer"
+             className="flex h-8 px-3.5 items-center justify-center rounded-xl bg-[rgb(var(--bg-dark))] text-white text-xs font-extrabold gap-1.5 shadow-sm hover:bg-[rgb(var(--bg-dark))]/90 active:scale-95 transition-all cursor-pointer"
            >
              <Phone className="h-3.5 w-3.5" />
              Llamada

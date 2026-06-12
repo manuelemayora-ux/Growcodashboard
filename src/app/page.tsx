@@ -218,14 +218,14 @@ export default function LandingPage() {
       {/* ---- HERO ---- */}
       <section className="px-6 pb-24 pt-20 md:pt-32 relative z-10">
         <div className="mx-auto max-w-7xl">
-          <div className="grid lg:grid-cols-[1.1fr_0.9fr] gap-12 lg:gap-16 items-center">
+          <div className="grid grid-cols-[1.3fr_0.7fr] sm:grid-cols-[1.1fr_0.9fr] gap-4 sm:gap-12 lg:gap-16 items-center">
             <div className="relative z-20">
               <div className="hero-badge mb-8 inline-flex items-center gap-3 rounded-full px-5 py-2 text-sm font-bold glass-cyan text-[rgb(var(--bg-dark))] dark:text-white shadow-lg border border-[rgba(0,209,255,0.3)]">
                 <span className="flex h-2.5 w-2.5 rounded-full animate-pulse" style={{ background: 'rgb(var(--accent))' }} />
                 Implementación e integración llave en mano
               </div>
 
-              <h1 className="hero-title-anim text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-black leading-[1.1] tracking-tight text-[rgb(var(--bg-dark))] dark:text-white">
+              <h1 className="hero-title-anim text-2xl sm:text-5xl lg:text-6xl xl:text-7xl font-black leading-[1.1] tracking-tight text-[rgb(var(--bg-dark))] dark:text-white">
                 Controla tu stock
                 <br />
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-[rgb(var(--blue-deep))] to-[rgb(var(--cyan-bright))]">
@@ -233,7 +233,7 @@ export default function LandingPage() {
                 </span>
               </h1>
 
-              <p className="hero-desc-anim mt-8 max-w-xl text-lg sm:text-xl leading-relaxed font-medium text-[rgb(var(--text-secondary))] dark:text-gray-300">
+              <p className="hero-desc-anim mt-8 max-w-xl text-[13px] sm:text-xl leading-relaxed font-medium text-[rgb(var(--text-secondary))] dark:text-gray-300">
                 Desplegamos un sistema completo de inventario y facturación adaptado a tu empresa. Con la tecnología de <strong className="text-[rgb(var(--bg-dark))] dark:text-white">Growco</strong>, 
                 obtén flujos de trabajo optimizados y paneles analíticos en tiempo real para tu negocio.
               </p>
@@ -253,12 +253,12 @@ export default function LandingPage() {
             </div>
             
             {/* HERO IMAGE - MASSIVE 3D TILT CARD */}
-            <div className="hero-card-anim relative w-full flex justify-center lg:justify-end">
-              <TiltCard className="relative w-full max-w-[580px] aspect-square rounded-[48px] p-0 glass-premium border border-white/30 dark:border-white/5 shadow-2xl flex items-center justify-center overflow-hidden glow-border-trigger" maxTilt={12} scale={1.03}>
+            <div className="hero-card-anim relative w-full flex items-center justify-center lg:justify-end">
+              <TiltCard className="relative w-full max-w-[120px] min-[400px]:max-w-[160px] sm:max-w-[320px] md:max-w-[450px] lg:max-w-[580px] aspect-square rounded-[16px] sm:rounded-[32px] lg:rounded-[48px] p-0 glass-premium border border-white/30 dark:border-white/5 shadow-md sm:shadow-2xl flex items-center justify-center overflow-hidden glow-border-trigger" maxTilt={12} scale={1.03}>
                 <div className="absolute inset-0 bg-gradient-to-tr from-[rgb(var(--cyan))]/20 via-[rgb(var(--blue-deep))]/10 to-transparent pointer-events-none blur-[40px]"></div>
                 
                 {/* Card 1: Stock Crítico / Alertas (Top-Left) */}
-                <div className="absolute top-[8%] left-[6%] p-3 md:p-3.5 bg-white/85 dark:bg-slate-900/75 backdrop-blur-md border border-white/30 dark:border-white/10 rounded-2xl shadow-xl animate-float flex items-center gap-3 z-30 pointer-events-none">
+                <div className="absolute top-[8%] left-[6%] p-3 md:p-3.5 bg-white/85 dark:bg-slate-900/75 backdrop-blur-md border border-white/30 dark:border-white/10 rounded-2xl shadow-xl animate-float hidden sm:flex items-center gap-3 z-30 pointer-events-none">
                   <div className="bg-red-50 dark:bg-red-950/40 p-2 rounded-xl text-red-500">
                     <AlertCircle className="h-5 w-5" />
                   </div>
@@ -269,7 +269,7 @@ export default function LandingPage() {
                 </div>
 
                 {/* Card 2: Alta Rotación (Middle-Right) - contained inside card */}
-                <div className="absolute top-[45%] right-[4%] p-3 bg-white/85 dark:bg-slate-900/75 backdrop-blur-md border border-white/30 dark:border-white/10 rounded-2xl shadow-xl z-30 animate-float pointer-events-none flex items-center gap-3" style={{ animationDelay: "3s" }}>
+                <div className="absolute top-[45%] right-[4%] p-3 bg-white/85 dark:bg-slate-900/75 backdrop-blur-md border border-white/30 dark:border-white/10 rounded-2xl shadow-xl z-30 animate-float pointer-events-none hidden sm:flex items-center gap-3" style={{ animationDelay: "3s" }}>
                   <div className="bg-[rgb(var(--accent-dim))] dark:bg-lime-950/40 p-2 rounded-xl text-lime-600 dark:text-[rgb(var(--accent))]">
                     <TrendingUp className="h-5 w-5" />
                   </div>
@@ -280,7 +280,7 @@ export default function LandingPage() {
                 </div>
 
                 {/* Card 3: Multi-Bodega (Bottom-Left) */}
-                <div className="absolute bottom-[10%] left-[6%] p-3 md:p-3.5 bg-white/85 dark:bg-slate-900/75 backdrop-blur-md border border-white/30 dark:border-white/10 rounded-2xl shadow-xl z-30 animate-float pointer-events-none flex items-center gap-3" style={{ animationDelay: "1.5s" }}>
+                <div className="absolute bottom-[10%] left-[6%] p-3 md:p-3.5 bg-white/85 dark:bg-slate-900/75 backdrop-blur-md border border-white/30 dark:border-white/10 rounded-2xl shadow-xl z-30 animate-float pointer-events-none hidden sm:flex items-center gap-3" style={{ animationDelay: "1.5s" }}>
                   <div className="bg-[rgb(var(--cyan-dim))] dark:bg-cyan-950/40 p-2 rounded-xl text-[rgb(var(--blue-deep))] dark:text-[rgb(var(--cyan))]">
                     <Boxes className="h-5 w-5" />
                   </div>
