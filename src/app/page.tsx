@@ -141,6 +141,18 @@ export default function LandingPage() {
       ease: "power3.out"
     });
 
+    gsap.from(".impl-card-anim", {
+      scrollTrigger: {
+        trigger: ".impl-section",
+        start: "top 85%",
+      },
+      y: 60,
+      opacity: 0,
+      scale: 0.97,
+      duration: 1,
+      ease: "power4.out"
+    });
+
     gsap.from(".impl-item-anim", {
       scrollTrigger: {
         trigger: ".impl-list",
@@ -226,14 +238,14 @@ export default function LandingPage() {
                 obtén flujos de trabajo optimizados y paneles analíticos en tiempo real para tu negocio.
               </p>
 
-              <div className="mt-10 flex flex-col items-start gap-4 sm:flex-row">
-                <Link href="/dashboard" className="hero-btn-anim btn-primary text-lg px-10 py-4 shadow-[0_10px_40px_rgba(0,209,255,0.4)] hover:scale-105 transition-transform duration-300">
+              <div className="mt-10 flex flex-row flex-wrap items-center gap-3 sm:gap-4">
+                <Link href="/dashboard" className="hero-btn-anim btn-primary text-sm sm:text-lg px-6 sm:px-10 py-3.5 sm:py-4 shadow-[0_10px_40px_rgba(0,209,255,0.4)] hover:scale-105 transition-transform duration-300">
                   Ingresar a la Demo
                   <ArrowRight className="h-5 w-5" />
                 </Link>
                 <button 
                   onClick={() => { setContactType("llamada"); setIsContactOpen(true); }}
-                  className="hero-btn-anim btn-dark px-10 py-4 text-lg shadow-xl hover:bg-slate-900/90 hover:scale-105 transition-transform duration-300 cursor-pointer flex items-center gap-2"
+                  className="hero-btn-anim btn-dark px-6 sm:px-10 py-3.5 sm:py-4 text-sm sm:text-lg shadow-xl hover:bg-slate-900/90 hover:scale-105 transition-transform duration-300 cursor-pointer flex items-center gap-2"
                 >
                   Agendar Llamada
                 </button>
@@ -450,7 +462,7 @@ export default function LandingPage() {
       {/* ---- WHAT'S INCLUDED ---- */}
       <section className="impl-section px-6 py-32 relative overflow-hidden bg-white dark:bg-slate-950/60 backdrop-blur-md border-t border-b border-gray-100 dark:border-white/5">
         <div className="mx-auto max-w-5xl relative z-10">
-          <div className="cta-card-anim glass-premium-dark p-12 md:p-20 relative overflow-hidden rounded-[48px] shadow-3xl border border-white/10">
+          <div className="impl-card-anim glass-premium-dark p-12 md:p-20 relative overflow-hidden rounded-[48px] shadow-3xl border border-white/10">
             {/* Interactive moving gradient mesh inside the dark panel */}
             <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-gradient-to-bl from-[rgb(var(--cyan))]/20 to-transparent opacity-40 rounded-full blur-[100px] transform translate-x-1/4 -translate-y-1/4"></div>
             
