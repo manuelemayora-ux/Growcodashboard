@@ -220,8 +220,8 @@ export default function LandingPage() {
         <div className="mx-auto max-w-7xl">
           <div className="grid grid-cols-[1.3fr_0.7fr] sm:grid-cols-[1.1fr_0.9fr] gap-4 sm:gap-12 lg:gap-16 items-center">
             <div className="relative z-20">
-              <div className="hero-badge mb-8 inline-flex items-center gap-3 rounded-full px-5 py-2 text-sm font-bold glass-cyan text-[rgb(var(--bg-dark))] dark:text-white shadow-lg border border-[rgba(0,209,255,0.3)]">
-                <span className="flex h-2.5 w-2.5 rounded-full animate-pulse" style={{ background: 'rgb(var(--accent))' }} />
+              <div className="hero-badge mb-4 sm:mb-8 inline-flex items-center gap-2 sm:gap-3 rounded-full px-3 py-1.5 sm:px-5 sm:py-2 text-[10px] sm:text-sm font-bold glass-cyan text-[rgb(var(--bg-dark))] dark:text-white shadow-lg border border-[rgba(0,209,255,0.3)]">
+                <span className="flex h-1.5 w-1.5 sm:h-2.5 sm:w-2.5 rounded-full animate-pulse" style={{ background: 'rgb(var(--accent))' }} />
                 Implementación e integración llave en mano
               </div>
 
@@ -251,8 +251,7 @@ export default function LandingPage() {
                 </button>
               </div>
             </div>
-            
-            {/* HERO IMAGE - WRAPPER FOR FLOATING 3D CARDS */}
+                 {/* HERO IMAGE - WRAPPER FOR FLOATING 3D CARDS */}
             <div className="hero-card-anim relative w-full flex items-center justify-center lg:justify-end">
               <div className="relative w-full max-w-[120px] min-[400px]:max-w-[160px] sm:max-w-[320px] md:max-w-[450px] lg:max-w-[580px] aspect-square">
                 
@@ -266,37 +265,37 @@ export default function LandingPage() {
                     className="w-full h-full object-cover relative z-20 drop-shadow-[0_20px_50px_rgba(0,51,255,0.3)] hover:scale-105 transition-transform duration-500 ease-out"
                   />
                 </TiltCard>
-
+ 
                 {/* Card 1: Stock Crítico / Alertas (Outside TiltCard, absolute to the wrapper) */}
-                <div className="absolute top-[6%] left-[-30%] sm:top-[8%] sm:left-[-15%] p-1.5 sm:p-3 bg-white/95 dark:bg-slate-900/80 backdrop-blur-md border border-white/30 dark:border-white/10 rounded-xl sm:rounded-2xl shadow-md sm:shadow-xl animate-float flex items-center gap-1.5 sm:gap-3 z-30 pointer-events-none">
-                  <div className="bg-red-50 dark:bg-red-950/40 p-1 sm:p-2 rounded-md sm:rounded-xl text-red-500">
-                    <AlertCircle className="h-3 w-3 sm:h-5 w-5" />
+                <div className="hidden sm:flex absolute top-[6%] right-[78%] left-auto sm:top-[8%] sm:left-[-15%] sm:right-auto p-1 sm:p-3 bg-white/95 dark:bg-slate-900/80 backdrop-blur-md border border-white/30 dark:border-white/10 rounded-lg sm:rounded-2xl shadow-md sm:shadow-xl animate-float items-center gap-1 sm:gap-3 z-30 pointer-events-none">
+                  <div className="bg-red-50 dark:bg-red-950/40 p-0.5 sm:p-2 rounded-md sm:rounded-xl text-red-500">
+                    <AlertCircle className="h-2.5 w-2.5 sm:h-5 w-5" />
                   </div>
                   <div className="whitespace-nowrap">
-                    <div className="text-[7px] sm:text-[9px] md:text-[10px] text-red-500 font-extrabold uppercase tracking-wider">Stock Crítico</div>
-                    <div className="text-[8px] sm:text-xs font-black text-gray-900 dark:text-white">5 ítems por reordenar</div>
+                    <div className="text-[6px] sm:text-[9px] md:text-[10px] text-red-500 font-extrabold uppercase tracking-wider">Stock Crítico</div>
+                    <div className="text-[7px] sm:text-xs font-black text-gray-900 dark:text-white">5 ítems por reordenar</div>
                   </div>
                 </div>
 
                 {/* Card 2: Alta Rotación (Outside TiltCard, absolute to the wrapper) */}
-                <div className="absolute top-[42%] right-[-30%] sm:top-[45%] sm:right-[-15%] p-1.5 sm:p-3 bg-white/95 dark:bg-slate-900/80 backdrop-blur-md border border-white/30 dark:border-white/10 rounded-xl sm:rounded-2xl shadow-md sm:shadow-xl z-30 animate-float pointer-events-none flex items-center gap-1.5 sm:gap-3" style={{ animationDelay: "3s" }}>
-                  <div className="bg-[rgb(var(--accent-dim))] dark:bg-lime-950/40 p-1 sm:p-2 rounded-md sm:rounded-xl text-lime-600 dark:text-[rgb(var(--accent))]">
-                    <TrendingUp className="h-3 w-3 sm:h-5 w-5" />
+                <div className="hidden sm:flex absolute top-[42%] left-[78%] right-auto sm:top-[45%] sm:left-auto sm:right-[-15%] p-1 sm:p-3 bg-white/95 dark:bg-slate-900/80 backdrop-blur-md border border-white/30 dark:border-white/10 rounded-lg sm:rounded-2xl shadow-md sm:shadow-xl z-30 animate-float pointer-events-none items-center gap-1 sm:gap-3" style={{ animationDelay: "3s" }}>
+                  <div className="bg-[rgb(var(--accent-dim))] dark:bg-lime-950/40 p-0.5 sm:p-2 rounded-md sm:rounded-xl text-lime-600 dark:text-[rgb(var(--accent))]">
+                    <TrendingUp className="h-2.5 w-2.5 sm:h-5 w-5" />
                   </div>
                   <div className="whitespace-nowrap">
-                    <div className="text-[7px] sm:text-[9px] text-gray-500 dark:text-gray-400 font-extrabold uppercase tracking-wider">Alta Rotación</div>
-                    <div className="text-[8px] sm:text-xs font-black text-gray-900 dark:text-white">Aro Aviator Solar</div>
+                    <div className="text-[6px] sm:text-[9px] text-gray-500 dark:text-gray-400 font-extrabold uppercase tracking-wider">Alta Rotación</div>
+                    <div className="text-[7px] sm:text-xs font-black text-gray-900 dark:text-white">Aro Aviator Solar</div>
                   </div>
                 </div>
 
                 {/* Card 3: Multi-Bodega (Outside TiltCard, absolute to the wrapper) */}
-                <div className="absolute bottom-[8%] left-[-30%] sm:bottom-[10%] sm:left-[-15%] p-1.5 sm:p-3 bg-white/95 dark:bg-slate-900/80 backdrop-blur-md border border-white/30 dark:border-white/10 rounded-xl sm:rounded-2xl shadow-md sm:shadow-xl z-30 animate-float pointer-events-none flex items-center gap-1.5 sm:gap-3" style={{ animationDelay: "1.5s" }}>
-                  <div className="bg-[rgb(var(--cyan-dim))] dark:bg-cyan-950/40 p-1 sm:p-2 rounded-md sm:rounded-xl text-[rgb(var(--blue-deep))] dark:text-[rgb(var(--cyan))]">
-                    <Boxes className="h-3 w-3 sm:h-5 w-5" />
+                <div className="hidden sm:flex absolute bottom-[8%] left-[78%] right-auto sm:bottom-[10%] sm:left-[-15%] sm:right-auto p-1 sm:p-3 bg-white/95 dark:bg-slate-900/80 backdrop-blur-md border border-white/30 dark:border-white/10 rounded-lg sm:rounded-2xl shadow-md sm:shadow-xl z-30 animate-float pointer-events-none items-center gap-1 sm:gap-3" style={{ animationDelay: "1.5s" }}>
+                  <div className="bg-[rgb(var(--cyan-dim))] dark:bg-cyan-950/40 p-0.5 sm:p-2 rounded-md sm:rounded-xl text-[rgb(var(--blue-deep))] dark:text-[rgb(var(--cyan))]">
+                    <Boxes className="h-2.5 w-2.5 sm:h-5 w-5" />
                   </div>
                   <div className="whitespace-nowrap">
-                    <div className="text-[7px] sm:text-[9px] md:text-[10px] text-gray-500 dark:text-gray-400 font-extrabold uppercase tracking-wider">Multi-Bodega</div>
-                    <div className="text-[8px] sm:text-xs font-black text-gray-900 dark:text-white">Sincronización activa</div>
+                    <div className="text-[6px] sm:text-[9px] md:text-[10px] text-gray-500 dark:text-gray-400 font-extrabold uppercase tracking-wider">Multi-Bodega</div>
+                    <div className="text-[7px] sm:text-xs font-black text-gray-900 dark:text-white">Sincronización activa</div>
                   </div>
                 </div>
               </div>
