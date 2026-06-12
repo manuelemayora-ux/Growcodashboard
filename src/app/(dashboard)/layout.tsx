@@ -126,7 +126,7 @@ function Sidebar({ onOpenContact }: { onOpenContact: (type?: "llamada" | "contac
           </div>
           <button 
             onClick={() => {
-              window.location.href = "/SaaSystem/login";
+              window.location.href = "/SaaSystem";
             }}
             style={{ color: 'rgb(var(--text-dim))' }} 
             className="transition-colors hover:text-[rgb(var(--red-main))] cursor-pointer"

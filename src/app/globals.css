@@ -82,7 +82,10 @@
 
   * { @apply border-border; }
 
-  html { font-size: 15px; }
+  html { font-size: 13.5px; }
+  @media (min-width: 768px) {
+    html { font-size: 14px; }
+  }
 
   body {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;

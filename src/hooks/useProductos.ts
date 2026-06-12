@@ -87,7 +87,7 @@ export function useProductos() {
       let remoteProducts: Product[] = [];
 
       try {
-        const res = await fetch('/api/products-sheet');
+        const res = await fetch('/SaaSystem/api/products-sheet');
         if (!res.ok) throw new Error('Failed to fetch from sheet API');
         remoteProducts = await res.json();
       } catch (err) {

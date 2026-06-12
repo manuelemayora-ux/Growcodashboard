@@ -195,7 +195,7 @@ export default function LandingPage() {
             >
               Agendar Llamada
             </button>
-            <Link href="/login" className="btn-primary py-3 px-8 text-base shadow-lg shadow-[rgba(0,209,255,0.3)] hover:scale-105 active:scale-95 transition-transform duration-200">
+            <Link href="/dashboard" className="btn-primary py-3 px-8 text-base shadow-lg shadow-[rgba(0,209,255,0.3)] hover:scale-105 active:scale-95 transition-transform duration-200">
               Ver Demo
               <ArrowRight className="h-5 w-5" />
             </Link>
@@ -227,7 +227,7 @@ export default function LandingPage() {
               </p>
 
               <div className="mt-10 flex flex-col items-start gap-4 sm:flex-row">
-                <Link href="/login" className="hero-btn-anim btn-primary text-lg px-10 py-4 shadow-[0_10px_40px_rgba(0,209,255,0.4)] hover:scale-105 transition-transform duration-300">
+                <Link href="/dashboard" className="hero-btn-anim btn-primary text-lg px-10 py-4 shadow-[0_10px_40px_rgba(0,209,255,0.4)] hover:scale-105 transition-transform duration-300">
                   Ingresar a la Demo
                   <ArrowRight className="h-5 w-5" />
                 </Link>
@@ -499,7 +499,7 @@ export default function LandingPage() {
               <p className="mx-auto mt-6 max-w-2xl text-xl text-white font-semibold drop-shadow-md leading-relaxed opacity-90">
                 Explora el sistema con datos reales de prueba y comprueba su rapidez. Nos encargamos de todo el proceso de personalización e implantación técnica por ti.
               </p>
-              <Link href="/login" className="btn-lime mt-12 inline-flex items-center justify-center gap-3 text-xl px-12 py-5 rounded-full shadow-[0_10px_30px_rgba(204,255,0,0.4)] hover:scale-105 transition-transform duration-300">
+              <Link href="/dashboard" className="btn-lime mt-12 inline-flex items-center justify-center gap-3 text-xl px-12 py-5 rounded-full shadow-[0_10px_30px_rgba(204,255,0,0.4)] hover:scale-105 transition-transform duration-300">
                 Explorar Demo
                 <ArrowRight className="h-6 w-6" />
               </Link>

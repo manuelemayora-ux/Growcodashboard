@@ -43,7 +43,7 @@ export async function updateSession(request: NextRequest) {
   })
 
   // Refrescar la sesión
-  const { data: { user } } = await supabase.auth.getUser()
+  await supabase.auth.getUser()
 
   // Rutas protegidas (comentadas por desuso de RLS temporal)
   /*
@@ -60,9 +60,9 @@ export async function updateSession(request: NextRequest) {
   }
   */
 
-  // Redirigir si ya logueado y va a auth
+  // Redirigir siempre de rutas de autenticación a dashboard directo
   const authRoutes = ['/login', '/signup']
-  if (authRoutes.some(r => request.nextUrl.pathname.startsWith(r)) && user) {
+  if (authRoutes.some(r => request.nextUrl.pathname.startsWith(r))) {
     return NextResponse.redirect(new URL('/dashboard', request.url))
   }
 
