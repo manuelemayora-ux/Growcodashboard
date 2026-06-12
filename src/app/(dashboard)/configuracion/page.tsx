@@ -34,7 +34,7 @@ export default function ConfigPage() {
           <div className="mt-4">
             <label className="stat-label mb-1.5 block">Logo Actual</label>
             <div className="flex items-center gap-4 p-4 rounded-2xl bg-[rgb(var(--bg-muted))]">
-              <Image src="/2.png" alt="Logo" width={48} height={48} className="object-contain"/>
+              <Image src="/SaaSystem/2.png" alt="Logo" width={48} height={48} className="object-contain"/>
               <div><div className="text-sm font-bold text-[rgb(var(--bg-dark))]">2.png</div><div className="text-xs text-[rgb(var(--text-dim))]">Logo minimalista Growco</div></div>
             </div>
           </div>

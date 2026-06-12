@@ -55,7 +55,7 @@ function Sidebar() {
     <aside className="fixed left-0 top-0 z-40 hidden h-screen w-[280px] flex-col bg-white md:flex shadow-[4px_0_24px_rgba(0,0,0,0.02)]" style={{ borderRight: '1px solid rgb(var(--border))' }}>
       {/* Minimalist Logo 2.png */}
       <div className="flex items-center gap-4 px-6 py-8">
-        <Image src="/2.png" alt="Growco Logo" width={48} height={48} className="object-contain" priority />
+        <Image src="/SaaSystem/2.png" alt="Growco Logo" width={48} height={48} className="object-contain" priority />
         <div className="flex flex-col">
           <span className="text-xl font-black tracking-tight leading-none text-[rgb(var(--bg-dark))]">GROWCO</span>
           <span className="text-[10px] font-bold tracking-widest text-[rgb(var(--cyan-bright))] uppercase mt-0.5">Stockly</span>
@@ -152,7 +152,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         {/* Mobile Header */}
         <header className="flex items-center justify-between px-6 py-4 bg-white border-b border-[rgb(var(--border))] md:hidden sticky top-0 z-30 shadow-sm">
            <div className="flex items-center gap-2">
-             <Image src="/2.png" alt="Growco Logo" width={28} height={28} className="object-contain" />
+             <Image src="/SaaSystem/2.png" alt="Growco Logo" width={28} height={28} className="object-contain" />
              <span className="font-black text-[rgb(var(--bg-dark))]">GROWCO</span>
            </div>
            <div className="flex h-8 w-8 items-center justify-center rounded-xl glass-cyan text-white text-xs font-bold">A</div>

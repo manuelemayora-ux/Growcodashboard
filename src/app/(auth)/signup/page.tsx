@@ -39,12 +39,12 @@ export default function SignupPage() {
     <div className="flex min-h-screen items-center justify-center px-4 relative overflow-hidden" style={{ background: 'rgb(var(--bg-base))' }}>
       {/* MASSIVE Decorative background 10 */}
       <div className="absolute left-0 bottom-0 w-[1000px] h-[1000px] opacity-15 pointer-events-none transform -translate-x-1/4 translate-y-1/4 mix-blend-multiply">
-        <Image src="/10.png" alt="Decorative" width={1000} height={1000} className="object-contain" priority />
+        <Image src="/SaaSystem/10.png" alt="Decorative" width={1000} height={1000} className="object-contain" priority />
       </div>
 
       {/* Decorative 11 on the top right */}
       <div className="absolute right-0 top-0 w-[800px] h-[800px] opacity-15 pointer-events-none transform translate-x-1/4 -translate-y-1/4 mix-blend-multiply">
-        <Image src="/11.png" alt="Decorative" width={800} height={800} className="object-contain" priority />
+        <Image src="/SaaSystem/11.png" alt="Decorative" width={800} height={800} className="object-contain" priority />
       </div>
 
       <div className="w-full max-w-md animate-fade-up bento-card p-12 relative z-10 overflow-hidden shadow-2xl shadow-[rgba(0,51,255,0.08)] border-[3px] border-white/60 backdrop-blur-xl bg-white/80 rounded-[40px]">
@@ -55,11 +55,11 @@ export default function SignupPage() {
         <div className="mb-10 text-center relative z-10 flex flex-col items-center">
           {/* MASSIVE 3D GLASS G */}
           <div className="mx-auto mb-6 drop-shadow-[0_20px_40px_rgba(0,51,255,0.3)] transform hover:scale-105 transition-transform duration-500">
-            <Image src="/12.png" alt="Growco 3D Logo" width={160} height={160} className="object-contain" priority />
+            <Image src="/SaaSystem/12.png" alt="Growco 3D Logo" width={160} height={160} className="object-contain" priority />
           </div>
           
           <div className="flex items-center gap-3 mb-2">
-            <Image src="/2.png" alt="Growco Icon" width={32} height={32} className="object-contain" priority />
+            <Image src="/SaaSystem/2.png" alt="Growco Icon" width={32} height={32} className="object-contain" priority />
             <span className="text-2xl font-black tracking-tight text-[rgb(var(--bg-dark))]">GROWCO</span>
           </div>
 
